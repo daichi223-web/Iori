@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Iori API
+  version: 1.0.0
+  description: |
+    TDD で構築された TypeScript ベースの REST API
+
+    ## 特徴
+    - TypeScript による型安全性
+    - Jest による 80% 以上のテストカバレッジ
+    - Express.js フレームワーク
+
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: 開発環境
+  - url: https://api.example.com
+    description: 本番環境
+
+tags:
+  - name: Health
+    description: ヘルスチェック・サンプルエンドポイント
+
+paths:
+  /api/hello:
+    get:
+      summary: Hello World エンドポイント
+      description: |
+        シンプルな Hello World メッセージと現在のタイムスタンプを返します。
+
+        ## 用途
+        - API の疎通確認
+        - ヘルスチェック
+        - サンプル実装の参照
+
+        ## テストカバレッジ
+        - ステータスコード: ✅
+        - Content-Type: ✅
+        - レスポンスボディ: ✅
+        - タイムスタンプ形式: ✅
+
+      operationId: getHello
+      tags:
+        - Health
+      responses:
+        '200':
+          description: 成功レスポンス
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelloResponse'
+              examples:
+                success:
+                  summary: 正常なレスポンス
+                  value:
+                    message: "Hello, World!"
+                    timestamp: "2024-01-01T12:00:00.000Z"
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HelloResponse:
+      type: object
+      required:
+        - message
+        - timestamp
+      properties:
+        message:
+          type: string
+          description: Hello World メッセージ
+          example: "Hello, World!"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 形式のタイムスタンプ
+          example: "2024-01-01T12:00:00.000Z"
+      description: Hello エンドポイントのレスポンス
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: エラーコード
+          example: "INTERNAL_SERVER_ERROR"
+        message:
+          type: string
+          description: エラーメッセージ
+          example: "An unexpected error occurred"
+        timestamp:
+          type: string
+          format: date-time
+          description: エラー発生時刻

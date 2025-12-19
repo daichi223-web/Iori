@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm test)",
+      "Bash(cat:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(test:*)",
+      "Bash(claude --version:*)",
+      "Bash(codex --help:*)",
+      "Bash(codex exec:*)",
+      "Bash(claude --print)",
+      "Bash(claude --print:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git config:*)",
+      "Bash(git.exe init:*)",
+      "Bash(git.exe status:*)",
+      "Bash(git.exe add:*)"
+    ]
+  }
+}
