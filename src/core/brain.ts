@@ -4,10 +4,8 @@ import util from "util";
 import chalk from "chalk";
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 
 const execPromise = util.promisify(exec);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // 3つの脳（すべてCLIツール経由）
 export type BrainProvider = 'CLAUDE' | 'CODEX' | 'GEMINI';

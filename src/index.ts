@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Hello World API endpoint
-app.get('/api/hello', (req: Request, res: Response) => {
+app.get('/api/hello', (_req: Request, res: Response) => {
   res.json({
     message: 'Hello, World!',
     timestamp: new Date().toISOString()

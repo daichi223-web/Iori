@@ -1,1 +1,21 @@
-/**\n * Calculates Fibonacci number.\n * @param n Non-negative integer index.\n * @returns Fibonacci number at position n.\n */\nexport function fibonacci(n: number): number {\n  if (!Number.isInteger(n) || n < 0) {\n    throw new Error(\"n must be a non-negative integer\");\n  }\n\n  let a = 0;\n  let b = 1;\n\n  for (let i = 0; i < n; i += 1) {\n    const next = a + b;\n    a = b;\n    b = next;\n  }\n\n  return a;\n}\n
+/**
+ * Calculates Fibonacci number.
+ * @param n Non-negative integer index.
+ * @returns Fibonacci number at position n.
+ */
+export function fibonacci(n: number): number {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new Error("n must be a non-negative integer");
+  }
+
+  let a = 0;
+  let b = 1;
+
+  for (let i = 0; i < n; i += 1) {
+    const next = a + b;
+    a = b;
+    b = next;
+  }
+
+  return a;
+}

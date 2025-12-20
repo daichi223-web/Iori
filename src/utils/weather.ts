@@ -23,7 +23,7 @@ export async function getWeather(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data: WeatherData = await response.json();
+    const data = await response.json() as WeatherData;
     
     return data;
   } catch (error) {

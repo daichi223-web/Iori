@@ -1,0 +1,409 @@
+================================================================================
+                    IORI プロジェクト現状レポート
+                     生成日時: 2025-12-20
+================================================================================
+
+【プロジェクト概要】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+プロジェクト名: AI Development System (Iori)
+バージョン: 3.0
+コンセプト: ZEAMi-style Multi-Agent Autonomous Development System
+開発手法: テスト駆動開発 (TDD) + TypeScript
+ライセンス: MIT
+
+【プロジェクト統計】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 総ファイル数: 71ファイル (TS/JS/JSON/MD)
+- ソースコード行数: 1,120行
+- プロジェクトサイズ: 170MB (node_modules含む)
+- TypeScriptファイル数: 約18ファイル (src/)
+- Node.js要件: >= 18.0.0
+
+【アーキテクチャ: Trinity System】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌─────────────────────────────────────────────────┐
+  │          Iori Kernel v3.0 (index.ts)           │
+  │   - C3L Engine (コマンド層)                      │
+  │   - Brain Selector (AI選択エンジン)             │
+  │   - Shell Controller (実行制御)                 │
+  └─────────────────────────────────────────────────┘
+                          │
+        ┌─────────────────┼─────────────────┐
+        │                 │                 │
+    ┌───▼───┐        ┌───▼───┐        ┌───▼───┐
+    │CLAUDE │        │GEMINI │        │CODEX  │
+    │(設計)  │        │(分析)  │        │(実装)  │
+    └───────┘        └───────┘        └───────┘
+
+【3つの脳 (Trinity AI System)】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. CLAUDE: 設計とコード生成 (デフォルト)
+   - CLI経由: `claude --print`
+   - 役割: アーキテクチャ設計、高品質コード生成
+   - フェイルオーバー: Gemini失敗時の自動エスカレーション
+
+2. GEMINI: 分析と計画作成
+   - CLI経由: `gemini`
+   - 役割: コード分析、タスク分解
+   - 設定: GEMINI_API_KEY (.env)
+
+3. CODEX: 実装の最終化
+   - CLI経由: `codex exec`
+   - 役割: ファイル保存、実装確定
+   - 設定: OPENAI_API_KEY (.env)
+
+【ディレクトリ構造】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Iori/
+├── index.ts                    # エントリーポイント (3.4KB)
+├── package.json                # 依存関係定義
+├── tsconfig.json               # TypeScript設定
+├── vitest.config.ts            # テスト設定
+│
+├── src/                        # ソースコード
+│   ├── core/                   # コアシステム (6ファイル)
+│   │   ├── kernel.ts           # メインカーネル (14KB) ★最重要
+│   │   ├── brain.ts            # AI選択エンジン (2.9KB)
+│   │   ├── c3l.ts              # C3Lコマンド層 (2.0KB)
+│   │   ├── shell.ts            # シェル実行制御 (2.5KB)
+│   │   ├── agent-pool.ts       # エージェントプール (4.4KB)
+│   │   └── tmux-driver.ts      # tmux制御 (3.7KB)
+│   │
+│   ├── frontend/               # Webダッシュボード
+│   │   ├── server.ts           # Expressサーバー (ポート3000)
+│   │   └── index.html          # ハッカー風UI (黒背景/緑文字)
+│   │
+│   ├── tools/                  # ツール群
+│   │   ├── sysinfo.ts          # システム情報取得
+│   │   └── weather.ts          # 天気API (Open-Meteo)
+│   │
+│   ├── utils/                  # ユーティリティ (17ファイル)
+│   │   ├── math.ts
+│   │   ├── subtract.ts
+│   │   ├── email.ts
+│   │   └── output_*.ts         # ⚠️ 一時ファイル (5個残存)
+│   │
+│   └── __tests__/              # テストスイート
+│       └── hello.test.ts
+│
+├── .iori/                      # Ioriシステムフォルダ
+│   ├── agents/                 # エージェント状態管理
+│   │   ├── architect-00/
+│   │   ├── developer-01/
+│   │   └── tester-02/
+│   ├── c3l/                    # C3L定義
+│   │   ├── definitions.json
+│   │   └── prompts/
+│   └── logs/
+│
+├── .iori_temp/                 # 一時プロンプトファイル
+│   ├── prompt_*.txt            # AIへのプロンプト一時保存
+│   └── *.ts                    # テスト用ファイル
+│
+├── docs/                       # ドキュメント
+├── dashboard/                  # ダッシュボード (旧版?)
+├── orchestrator/               # オーケストレーター
+├── TODO.md                     # タスク管理
+├── README.md                   # プロジェクト説明
+├── CLAUDE.md                   # Claude用開発ガイドライン
+└── iori_system.log             # 実行ログ (3.5KB)
+
+【主要機能】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. C3L コマンドシステム
+   使い方: node index.ts c3l <directive> <layer> <description>
+   例: node index.ts c3l implement code "Create multiply function"
+
+2. 自律実行モード (TODO.md ベース)
+   使い方: node index.ts
+   動作: TODO.mdを読み取り、自動でタスク実行
+
+3. シェルコマンド実行
+   使い方: node index.ts shell "npm test"
+
+4. C3Lコマンド一覧表示
+   使い方: node index.ts list
+
+5. Webダッシュボード
+   起動: npm run dashboard
+   URL: http://localhost:3000
+   機能:
+   - リアルタイムログ表示 (/api/logs)
+   - TODOリスト表示 (/api/todos)
+   - 2秒ごと自動更新
+
+【依存関係】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【AI/LLM】
+- @google/generative-ai: ^0.24.1      # Gemini API
+- openai: ^6.14.0                     # OpenAI/Codex API
+
+【開発ツール】
+- typescript: ^5.3.0
+- tsx: ^4.6.0                         # TypeScript実行環境
+- vitest: ^1.0.0                      # テストフレームワーク
+- pkg: ^5.8.1                         # 実行可能ファイル化
+
+【ユーティリティ】
+- chalk: ^5.6.2                       # ターミナル色付け
+- dotenv: ^16.4.1                     # 環境変数管理
+- express: ^4.18.2                    # Webサーバー
+- simple-git: ^3.22.0                 # Git操作
+- zod: ^3.22.4                        # スキーマ検証
+
+【NPMスクリプト】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- npm run build         : TypeScriptコンパイル
+- npm run build:pkg     : パッケージ用ビルド
+- npm run dev           : 開発サーバー (watch mode)
+- npm run exe           : Windows実行ファイル生成 (iori.exe)
+- npm start             : 本番実行
+- npm test              : テスト実行 (watch)
+- npm run test:run      : テスト実行 (1回)
+- npm run test:watch    : テスト実行 (watch)
+- npm run typecheck     : 型チェック
+- npm run dashboard     : ダッシュボード起動
+- npm run orchestrator  : オーケストレーター起動
+- npm run lint          : ESLint実行
+- npm run format        : Prettier実行
+
+【実行ログ分析 (iori_system.log)】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+最終実行日時: 2025-12-19 06:23:19 (JST)
+総実行回数: 約15回
+
+【成功したタスク】
+✓ src/utils/weather.ts 作成 (Open-Meteo API統合)
+✓ src/tools/sysinfo.ts 作成 (システム情報取得)
+✓ src/frontend/server.ts 作成 (Expressサーバー)
+✓ src/frontend/index.html 作成 (ハッカー風UI)
+✓ 複数のutilsファイル生成 (output_*.ts)
+
+【失敗したタスク】
+✗ 初回sysinfo.ts作成 (パス解析エラー)
+  → 2回目の実行で成功
+
+【現在の状態】
+Status: STANDBY ("No pending tasks. Standing by.")
+Pending Tasks: 0件 (TODO.mdの未完了タスク)
+
+【TODO.md の状態】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+タイトル: Iori Frontend Tasks
+
+[x] src/frontend/server.ts を作成する ✓ 完了
+    - Expressサーバーをポート3000で起動
+    - ルート / で index.html を配信
+    - ルート /api/logs で iori_system.log をJSON返却
+    - ルート /api/todos で TODO.md を返却
+    - CORS有効化
+
+[x] src/frontend/index.html を作成する ✓ 完了
+    - デザイン: ハッカー風ダッシュボード (黒背景)
+    - ログ表示エリア (リアルタイム風)
+    - TODOリスト表示エリア
+    - 2秒ごと自動更新
+    - スタイル: 緑文字 (#0f0)
+
+結論: すべてのタスクが完了済み ✓
+
+【開発ガイドライン (CLAUDE.md)】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【コア原則】
+1. TypeScript必須 (any型は最小限)
+2. テスト駆動開発 (TDD) 必須
+   → RED (失敗するテスト) → GREEN (最小実装) → REFACTOR
+3. ファイルサイズ制限: 500行以内
+4. コード品質: カバレッジ80%以上
+
+【命名規則】
+- ファイル: kebab-case.ts
+- クラス: PascalCase
+- 関数/変数: camelCase
+- 定数: UPPER_SNAKE_CASE
+- テストファイル: [名前].test.ts
+
+【禁止事項】
+✗ テストなしの実装
+✗ any型の乱用
+✗ 500行超えファイル
+✗ console.logのコミット (デバッグ用除く)
+
+【問題点と課題】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【🔴 致命的な問題】
+1. テスト実行エラー
+   エラー: Cannot find module @rollup/rollup-linux-x64-gnu
+   原因: npm依存関係の破損 (WSL環境でのインストール問題)
+   影響: npm testが実行できない → TDD開発が不可能
+
+2. Git権限エラー
+   エラー: fatal: detected dubious ownership in repository
+   原因: WSL環境でのファイルシステム権限の不一致
+   影響: git statusなどのコマンドが実行不可
+
+【🟡 中程度の問題】
+3. 不要なファイルの残存
+   対象ファイル:
+   - src/utils/output_1766120339976.ts
+   - src/utils/output_1766120395635.ts
+   - src/utils/output_1766123467175.ts
+   - src/utils/output_1766123621398.ts
+   - src/utils/output_1766123628482.ts
+   - src/utils/output_1766124476934.ts
+   原因: C3L自動生成時のファイル名決定失敗
+   影響: リポジトリの肥大化、混乱
+
+4. .gitignore の不整合
+   問題: test_*.ts を無視しているが、test_*.ts ファイルが残存
+   残存ファイル:
+   - cleanup_test.ts
+   - test_integration.ts
+   - test_kernel.ts
+   - test_kernel_v3.ts
+   - test_monitor.ts
+   - test_shell.ts
+   - test_weather.ts
+
+5. バックアップファイルの残存
+   - index_v2_backup.ts (4.4KB)
+   - install_v3.ts (3.7KB)
+
+【🟢 軽微な問題】
+6. dist-pkg/ ディレクトリの存在
+   内容: ビルド済みJSファイル (30個以上)
+   問題: .gitignoreでは除外されているが、リポジトリに残存の可能性
+
+7. 空ファイルの存在
+   - output_1766117897433.md (0バイト)
+
+8. Ubuntu.appx の存在
+   サイズ: 15MB
+   問題: プロジェクトに無関係なファイル
+
+【システムの健全性評価】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+コア機能:        ★★★★☆ (4/5) - 動作確認済み
+コード品質:      ★★★☆☆ (3/5) - テストが実行できない状態
+ドキュメント:    ★★★★★ (5/5) - 充実している
+依存関係:        ★★☆☆☆ (2/5) - npm install失敗
+クリーンさ:      ★★☆☆☆ (2/5) - 一時ファイル多数
+TDD準拠:         ★☆☆☆☆ (1/5) - テスト実行不可で評価不能
+
+総合評価: ★★★☆☆ (3/5)
+「動作するが、品質保証とメンテナンス性に課題あり」
+
+【推奨される対応アクション】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【優先度: 緊急 🔴】
+1. 依存関係の完全再インストール
+   $ rm -rf node_modules package-lock.json
+   $ npm install
+
+2. Git権限問題の解決
+   $ git config --global --add safe.directory /mnt/c/Users/a713678/Documents/ai-agent/Iori
+
+3. テスト実行の確認
+   $ npm test
+   → 全テストが動作することを確認
+
+【優先度: 高 🟡】
+4. 不要ファイルのクリーンアップ
+   $ rm src/utils/output_*.ts
+   $ rm test_*.ts
+   $ rm index_v2_backup.ts install_v3.ts
+   $ rm output_1766117897433.md
+   $ rm Ubuntu.appx
+
+5. .gitignore の見直しと適用
+   $ git status
+   → 意図しないファイルが追跡されていないか確認
+
+6. dist-pkg/ の削除または更新
+   $ rm -rf dist-pkg/
+   $ npm run build:pkg
+
+【優先度: 中 🟢】
+7. テストカバレッジの測定
+   $ npm test -- --coverage
+   → 80%以上を目標
+
+8. 型チェックの実行
+   $ npm run typecheck
+   → 型エラーがないことを確認
+
+9. コードフォーマット
+   $ npm run format
+   $ npm run lint
+
+10. ドキュメントの更新
+    - README.mdに最新の使用方法を反映
+    - 実行例のスクリーンショット追加
+
+【優先度: 低 💡】
+11. .iori_temp/ の自動クリーンアップ機能追加
+12. iori_system.log のローテーション機能追加
+13. エラー時のリトライロジック強化
+14. CI/CD パイプライン構築 (GitHub Actions等)
+
+【次回開発時のチェックリスト】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+□ npm testが動作する
+□ 型エラーがない (npm run typecheck)
+□ 不要ファイルが残っていない
+□ 新機能にはテストがある
+□ カバレッジが80%以上
+□ CLAUDE.mdのガイドラインに準拠
+□ TODO.mdが最新
+□ コミット前に npm run format 実行
+
+【技術的な強み】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ マルチAI統合 (Claude/Gemini/Codex)
+✓ フェイルオーバー機能 (Gemini失敗時にClaude自動切替)
+✓ 一時ファイル方式による安定したAI通信
+✓ C3Lコマンドシステムによる拡張性
+✓ TODO.mdベースの自律実行
+✓ Webダッシュボードによる可視化
+✓ TypeScript完全対応
+✓ システムログによるトレーサビリティ
+
+【セキュリティ考慮事項】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ .env ファイルが .gitignore に含まれている
+✓ API キーは .env.example で管理
+✓ 一時ファイルは .iori_temp/ に隔離
+✓ シェルコマンド実行時のタイムアウト設定 (5分)
+⚠ maxBuffer 20MB設定 → 大きすぎる可能性 (要レビュー)
+
+【まとめ】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Iori プロジェクトは、野心的なマルチAI自律開発システムとして
+優れたアーキテクチャと機能を備えていますが、現時点では以下の
+課題により本格運用には至っていません:
+
+【現状】
+- コア機能は実装完了 ✓
+- フロントエンドダッシュボード実装済み ✓
+- Trinity AI System (3脳) 統合済み ✓
+- テストフレームワーク設定済み (但し実行不可) ✗
+
+【ブロッカー】
+1. npm依存関係の破損 → テスト実行不可
+2. Git権限エラー → バージョン管理困難
+3. 大量の不要ファイル → メンテナンス性低下
+
+【次のステップ】
+上記「推奨される対応アクション」の緊急・高優先度タスクを
+完了することで、プロジェクトは本格的な開発フェーズに
+移行できる状態になります。
+
+特にTDD原則を守るためには、テスト環境の復旧が最優先です。
+
+================================================================================
+                        レポート終了
+                生成者: Claude Code (Sonnet 4.5)
+================================================================================

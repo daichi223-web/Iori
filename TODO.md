@@ -1,4 +1,16 @@
-# Iori Tasks
+# Iori Frontend Tasks
 
-- [x] `src/tools/weather.ts` を作成する。Open-Meteo API (https://api.open-meteo.com/v1/forecast) を使って、指定した緯度・経度の天気を取得する関数を実装する。fetchを使用し、TypeScriptの型定義も含めること。
-- [x] `src/tools/sysinfo.ts` を作成する。`os` モジュールを使って、PCのメモリ使用率とCPU情報をコンソール表示するスクリプトを作る。
+- [x] `src/frontend/server.ts` を作成する。
+    - 機能: Expressサーバーをポート3000で起動する。
+    - ルート `/` で `src/frontend/index.html` を配信する。
+    - ルート `/api/logs` で `iori_system.log` の中身をJSON形式で返す。
+    - ルート `/api/todos` で `TODO.md` の中身を返す。
+    - `cors` を有効にすること。
+
+- [x] `src/frontend/index.html` を作成する。
+    - デザイン: 黒背景の「ハッカー風」ダッシュボード。
+    - 機能:
+        1. `/api/logs` からデータを取得し、リアルタイム風にログを表示するエリア。
+        2. `/api/todos` からデータを取得し、現在のタスクリストを表示するエリア。
+        3. 2秒ごとに自動更新するJavaScriptを含めること。
+    - スタイル: CSSはHTML内に埋め込むこと。文字色は緑（#0f0）を基調とする。

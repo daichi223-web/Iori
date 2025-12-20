@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iori v3.0 - Dashboard</title>
+    <style>
+        /* Apple Human Interface Guidelines準拠 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #F5F5F7 0%, #E8E8EA 100%);
+            color: #1D1D1F;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ヘッダー: すりガラス効果 */
+        header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #007AFF 0%, #5856D6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(52, 199, 89, 0.1);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #34C759;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #34C759;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* メインコンテナ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* カードスタイル */
+        .card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1D1D1F;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        /* ログエリア */
+        .log-container {
+            grid-column: 1 / -1;
+        }
+
+        .log-list {
+            background: #F5F5F7;
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            background: #FFFFFF;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-family: "SF Mono", Monaco, "Courier New", monospace;
+            color: #3A3A3C;
+            border-left: 3px solid #007AFF;
+            transition: background 0.2s ease;
+        }
+
+        .log-item:hover {
+            background: #F9F9F9;
+        }
+
+        .log-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .log-time {
+            color: #8E8E93;
+            font-size: 11px;
+            margin-right: 12px;
+        }
+
+        .log-message {
+            color: #1D1D1F;
+        }
+
+        /* メトリクスカード */
+        .metric {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white;
+            border-radius: 12px;
+            margin-top: 12px;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* スクロールバーカスタマイズ */
+        .log-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .log-list::-webkit-scrollbar-thumb {
+            background: #C7C7CC;
+            border-radius: 4px;
+        }
+
+        .log-list::-webkit-scrollbar-thumb:hover {
+            background: #AEAEB2;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">🌌 Iori v3.0</div>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>System Online</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- ステータスカード -->
+        <div class="card">
+            <div class="card-title">
+                <span class="card-icon">📊</span>
+                Status
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="uptime">--</div>
+                <div class="metric-label">Uptime (seconds)</div>
+            </div>
+        </div>
+
+        <!-- タスクカード -->
+        <div class="card">
+            <div class="card-title">
+                <span class="card-icon">✅</span>
+                Tasks
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="task-count">--</div>
+                <div class="metric-label">Total Tasks</div>
+            </div>
+        </div>
+
+        <!-- ログカード -->
+        <div class="card log-container">
+            <div class="card-title">
+                <span class="card-icon">📝</span>
+                System Logs
+            </div>
+            <div class="log-list" id="log-list">
+                <div class="log-item">
+                    <span class="log-time">Initializing...</span>
+                    <span class="log-message">Loading logs from server...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // APIからデータを取得
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                document.getElementById('uptime').textContent = Math.floor(data.uptime);
+            } catch (e) {
+                console.error('Failed to fetch status:', e);
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                const logList = document.getElementById('log-list');
+
+                if (data.lines && data.lines.length > 0) {
+                    logList.innerHTML = data.lines.slice(-10).reverse().map(line => {
+                        const match = line.match(/^\[(.*?)\]\s*(.*)$/);
+                        if (match) {
+                            return `
+                                <div class="log-item">
+                                    <span class="log-time">${match[1]}</span>
+                                    <span class="log-message">${match[2]}</span>
+                                </div>
+                            `;
+                        }
+                        return `
+                            <div class="log-item">
+                                <span class="log-message">${line}</span>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    logList.innerHTML = '<div class="log-item"><span class="log-message">No logs available</span></div>';
+                }
+            } catch (e) {
+                console.error('Failed to fetch logs:', e);
+            }
+        }
+
+        async function fetchTodos() {
+            try {
+                const res = await fetch('/api/todos');
+                const data = await res.json();
+                document.getElementById('task-count').textContent = data.count || 0;
+            } catch (e) {
+                console.error('Failed to fetch todos:', e);
+            }
+        }
+
+        // 初回読み込み
+        fetchStatus();
+        fetchLogs();
+        fetchTodos();
+
+        // 2秒ごとに自動更新
+        setInterval(() => {
+            fetchStatus();
+            fetchLogs();
+            fetchTodos();
+        }, 2000);
+    </script>
+</body>
+</html>

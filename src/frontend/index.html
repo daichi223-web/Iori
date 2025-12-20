@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iori Dashboard</title>
+    <style>
+      :root {
+        --color-primary: #007aff;
+        --color-bg: #f5f5f7;
+        --color-card: rgba(255, 255, 255, 0.8);
+        --color-text: #1d1d1f;
+        --color-text-secondary: #86868b;
+        --color-border: rgba(0, 0, 0, 0.08);
+        --color-success: #34c759;
+        --color-warning: #ff9500;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg: #000000;
+          --color-card: rgba(28, 28, 30, 0.8);
+          --color-text: #f5f5f7;
+          --color-text-secondary: #98989d;
+          --color-border: rgba(255, 255, 255, 0.1);
+          --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+          --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+        line-height: 1.5;
+        padding: 20px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, var(--color-primary), #5856d6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        color: var(--color-text-secondary);
+        font-size: 1rem;
+        font-weight: 400;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        background: var(--color-card);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-md);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--color-text);
+      }
+
+      .content-box {
+        background: rgba(0, 0, 0, 0.02);
+        border-radius: 12px;
+        padding: 16px;
+        min-height: 300px;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--color-border);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .content-box {
+          background: rgba(255, 255, 255, 0.05);
+        }
+      }
+
+      .log-entry {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--color-border);
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .log-entry:last-child {
+        border-bottom: none;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+        transition: background 0.2s ease;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .todo-item {
+          background: rgba(255, 255, 255, 0.08);
+        }
+      }
+
+      .todo-item:hover {
+        background: rgba(0, 122, 255, 0.08);
+      }
+
+      .todo-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .todo-status.complete {
+        background: var(--color-success);
+        box-shadow: 0 0 8px rgba(52, 199, 89, 0.4);
+      }
+
+      .todo-status.pending {
+        background: var(--color-warning);
+        box-shadow: 0 0 8px rgba(255, 149, 0, 0.4);
+      }
+
+      .todo-text {
+        flex: 1;
+        font-size: 0.95rem;
+      }
+
+      .todo-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .todo-badge.complete {
+        background: rgba(52, 199, 89, 0.15);
+        color: var(--color-success);
+      }
+
+      .todo-badge.pending {
+        background: rgba(255, 149, 0, 0.15);
+        color: var(--color-warning);
+      }
+
+      .error {
+        color: #ff3b30;
+        font-size: 0.85rem;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(255, 59, 48, 0.1);
+        border-radius: 6px;
+      }
+
+      footer {
+        text-align: center;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        padding: 20px 0;
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--color-success);
+        margin-right: 6px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Custom scrollbar */
+      .content-box::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .content-box::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .content-box::-webkit-scrollbar-thumb {
+        background: var(--color-border);
+        border-radius: 4px;
+      }
+
+      .content-box::-webkit-scrollbar-thumb:hover {
+        background: var(--color-text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Iori Dashboard</h1>
+        <div class="subtitle">AI Development System Monitor</div>
+      </header>
+
+      <main>
+        <div class="card">
+          <h2>System Logs</h2>
+          <div id="logStream" class="content-box"></div>
+          <div id="logError" class="error" style="display: none;"></div>
+        </div>
+
+        <div class="card">
+          <h2>Active Tasks</h2>
+          <div id="todoList" class="content-box"></div>
+          <div id="todoError" class="error" style="display: none;"></div>
+        </div>
+      </main>
+
+      <footer>
+        <span class="status-dot"></span>
+        Live updates every 2 seconds
+      </footer>
+    </div>
+
+    <script type="module">
+      type LogRecord = {
+        message: string;
+        timestamp?: string;
+      };
+
+      type TodoRecord = {
+        title: string;
+        completed?: boolean;
+      };
+
+      const logStream = document.getElementById("logStream");
+      const todoList = document.getElementById("todoList");
+      const logError = document.getElementById("logError");
+      const todoError = document.getElementById("todoError");
+
+      if (!logStream || !todoList || !logError || !todoError) {
+        throw new Error("Required elements not found");
+      }
+
+      const maxLogEntries = 40;
+      const logBuffer: string[] = [];
+
+      const escapeHtml = (value: string): string =>
+        value
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+      const renderLogs = (entries: string[]): void => {
+        if (entries.length === 0) {
+          logStream.innerHTML = '<div class="log-entry" style="opacity: 0.5;">No logs available</div>';
+          return;
+        }
+        logStream.innerHTML = entries
+          .slice(-maxLogEntries)
+          .map((entry) => `<div class="log-entry">${escapeHtml(entry)}</div>`)
+          .join("");
+      };
+
+      const renderTodos = (todos: TodoRecord[]): void => {
+        if (todos.length === 0) {
+          todoList.innerHTML = '<div class="log-entry" style="opacity: 0.5;">No active tasks</div>';
+          return;
+        }
+
+        todoList.innerHTML = todos
+          .map((todo) => {
+            const isComplete = todo.completed;
+            const statusClass = isComplete ? "complete" : "pending";
+            const badgeText = isComplete ? "Done" : "Active";
+            return `
+              <div class="todo-item">
+                <span class="todo-status ${statusClass}"></span>
+                <div class="todo-text">${escapeHtml(todo.title)}</div>
+                <span class="todo-badge ${statusClass}">${badgeText}</span>
+              </div>
+            `;
+          })
+          .join("");
+      };
+
+      const fetchJson = async <T,>(url: string): Promise<T> => {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+        return (await response.json()) as T;
+      };
+
+      const updateLogs = async (): Promise<void> => {
+        try {
+          logError.style.display = "none";
+          const data = await fetchJson<LogRecord[]>("/api/logs");
+          const newEntries = data.map((item) => {
+            const stamp = item.timestamp ? `[${item.timestamp}] ` : "";
+            return `${stamp}${item.message}`;
+          });
+
+          logBuffer.push(...newEntries);
+          renderLogs(logBuffer);
+        } catch (error) {
+          logError.style.display = "block";
+          logError.textContent =
+            error instanceof Error ? error.message : "Unknown log error";
+        }
+      };
+
+      const updateTodos = async (): Promise<void> => {
+        try {
+          todoError.style.display = "none";
+          const data = await fetchJson<TodoRecord[]>("/api/todos");
+          renderTodos(data);
+        } catch (error) {
+          todoError.style.display = "block";
+          todoError.textContent =
+            error instanceof Error ? error.message : "Unknown todo error";
+        }
+      };
+
+      const tick = async (): Promise<void> => {
+        await Promise.all([updateLogs(), updateTodos()]);
+      };
+
+      void tick();
+      window.setInterval(() => {
+        void tick();
+      }, 2000);
+    </script>
+  </body>
+</html>

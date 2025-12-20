@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "commands": [
+    {
+      "id": "arch.design.feature",
+      "directive": "design",
+      "layer": "feature",
+      "role": "ARCHITECT",
+      "description": "機能要件から詳細設計書を作成する",
+      "template": "arch/design_feature.md",
+      "output_rule": "docs/design/{{kebab_case_title}}.md"
+    },
+    {
+      "id": "dev.implement.code",
+      "directive": "implement",
+      "layer": "code",
+      "role": "DEVELOPER",
+      "description": "設計書に基づいてコードを実装する",
+      "template": "dev/implement_code.md",
+      "output_rule": "src/{{path}}"
+    },
+    {
+      "id": "qa.verify.test",
+      "directive": "verify",
+      "layer": "test",
+      "role": "TESTER",
+      "description": "実装されたコードに対してテストを実行し検証する",
+      "template": "qa/verify_test.md",
+      "output_rule": "tests/results/{{timestamp}}.log"
+    }
+  ]
+}

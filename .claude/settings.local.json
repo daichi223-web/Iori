@@ -20,7 +20,22 @@
       "Bash(git config:*)",
       "Bash(git.exe init:*)",
       "Bash(git.exe status:*)",
-      "Bash(git.exe add:*)"
+      "Bash(git.exe add:*)",
+      "Bash(git.exe commit -m \"$\\(cat <<''EOF''\n🌌 Iori OS v2.0: Autonomous AI Development System\n\n完全自律型AI開発OSの初回リリース\n\n## 主要機能\n- 🧠 3つの脳（Gemini/Claude/Codex）による適材適所の開発\n- 📝 TODO.mdベースの自律タスク実行\n- 📊 システムログ記録（iori_system.log）\n- 🔧 エラー自己修復機能\n- 🎯 一時ファイル方式による安定したAI通信\n\n## 生成物\n- src/utils/weather.ts - 型安全な天気API\n- src/tools/sysinfo.ts - システム情報取得ツール\n- src/core/brain.ts - マルチAI制御エンジン\n- index.ts - Iori Kernel v2.0\n\n## アーキテクチャ\n- Phase 1: Gemini（分析）\n- Phase 2: Claude（設計・実装）\n- Phase 3: Iori Kernel（適用）\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(gh auth:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git.exe remote add:*)",
+      "Bash(git.exe branch:*)",
+      "Bash(git.exe push:*)",
+      "Bash(git.exe log:*)",
+      "Bash(git.exe remote:*)",
+      "Bash(tree:*)",
+      "Bash(tmux:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && cat {}')",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(rm:*)",
+      "Bash(npm run typecheck:*)"
     ]
   }
 }

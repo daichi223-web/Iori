@@ -1,118 +1,89 @@
-// index.ts (Iori Kernel v2.0)
-import { think } from "./src/core/brain.js";
-import fs from "fs/promises";
-import path from "path";
+// index.ts (Iori Kernel v3.0 Entry Point)
+import { IoriKernel } from "./src/core/kernel.js";
 import chalk from "chalk";
 
-const TODO_FILE = "TODO.md";
-const LOG_FILE = "iori_system.log";
-
-// --- Helper: ログ記録 ---
-async function logSystem(message: string) {
-  const timestamp = new Date().toISOString();
-  const logLine = `[${timestamp}] ${message}\n`;
-  await fs.appendFile(LOG_FILE, logLine);
-  // コンソールにも出すが、色は呼び出し元で制御
-}
-
-// --- Helper: AIの出力からファイルパスとコードを抽出 ---
-function parseCodeBlock(text: string): { path: string | null, content: string } {
-  // 1. "FILE: path/to/file" のような指定を探す
-  const pathMatch = text.match(/(?:FILE|PATH):\s*([^\s\n]+)/i);
-  const filePath = pathMatch ? pathMatch[1].trim() : null;
-
-  // 2. コードブロック ```...``` の中身を探す
-  const codeMatch = text.match(/```(?:\w+)?\n([\s\S]*?)```/);
-  const content = codeMatch ? codeMatch[1] : text; // ブロックがなければ全体
-
-  return { path: filePath, content: content.trim() };
-}
-
+/**
+ * Iori Kernel v3.0 Main Entry Point
+ * C3L + Brain + Shell Controller の統合システム
+ */
 async function main() {
-  console.log(chalk.green("🌌 Iori OS v2.0: Autonomous Kernel Started."));
-  await logSystem("Kernel started.");
+  console.log(chalk.bold.magenta("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+  console.log(chalk.bold.magenta("  🌌 Iori Kernel v3.0"));
+  console.log(chalk.bold.magenta("  Unified AI Development System"));
+  console.log(chalk.bold.magenta("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
-  while (true) {
-    // 1. TODO読み込み
-    let todoContent = "";
-    try {
-      todoContent = await fs.readFile(TODO_FILE, "utf-8");
-    } catch {
-      console.log(chalk.red("❌ TODO.md not found. Creating one..."));
-      await fs.writeFile(TODO_FILE, "- [ ] Sample Task: Create a hello world file.\n");
-      continue;
-    }
+  // カーネル初期化
+  const kernel = new IoriKernel({
+    todoFile: "TODO.md",
+    logFile: "iori_system.log",
+    defaultBrain: (() => {
+      const envBrain = process.env.IORI_BRAIN?.toUpperCase();
+      if (envBrain === "CLAUDE" || envBrain === "GEMINI" || envBrain === "CODEX") {
+        return envBrain;
+      }
+      return "CLAUDE";
+    })(),
+    autoExecute: false // テスト自動実行を無効化（手動制御）
+  });
 
-    const lines = todoContent.split("\n");
-    const taskIndex = lines.findIndex(line => line.trim().startsWith("- [ ]"));
+  try {
+    await kernel.init();
 
-    if (taskIndex === -1) {
-      console.log(chalk.green("💤 No tasks left. Iori is standing by."));
-      break;
-    }
+    // コマンドライン引数をチェック
+    const args = process.argv.slice(2);
 
-    const taskLine = lines[taskIndex];
-    const taskDescription = taskLine.replace("- [ ]", "").trim();
-
-    console.log(chalk.yellow(`\n🎯 Processing: "${taskDescription}"`));
-    await logSystem(`Start Task: ${taskDescription}`);
-
-    try {
-      // --- Phase 1: Gemini (Analysis) ---
-      console.log(chalk.cyan("  🧠 Gemini is analyzing..."));
-      const plan = await think(
-        "このタスクの実装方針を簡潔にまとめて。",
-        taskDescription,
-        "GEMINI"
-      );
-
-      // --- Phase 2: Claude (Architecture & Coding) ---
-      console.log(chalk.magenta("  🧠 Claude is designing & coding..."));
-      const codingResult = await think(
-        `
-        以下のタスクと方針に基づき、実装コードを作成して。
-
-        【重要】出力フォーマット:
-        1行目に "FILE: src/utils/example.ts" のようにファイルパスを書くこと。
-        その後にコードブロックでコードを書くこと。
-        解説は不要。
-        `,
-        `TASK: ${taskDescription}\nPLAN: ${plan}`,
-        "CLAUDE"
-      );
-
-      // --- Phase 3: Iori Kernel (Execution) ---
-      // Codexを使うまでもなく、正規表現でパースして書き込む (コスト削減 & 高速化)
-      console.log(chalk.blue("  ⚙️ Iori Kernel is applying changes..."));
-
-      const { path: filePath, content } = parseCodeBlock(codingResult);
-
-      if (filePath && content) {
-        // ディレクトリ作成
-        await fs.mkdir(path.dirname(filePath), { recursive: true });
-        // ファイル書き込み
-        await fs.writeFile(filePath, content);
-        console.log(chalk.green(`  ✅ Saved to: ${filePath}`));
-        await logSystem(`Success: Written to ${filePath}`);
-      } else {
-        throw new Error("Could not parse file path from Claude's output.");
+    if (args.length === 0) {
+      // 引数なし: 自律実行モード
+      console.log(chalk.cyan("🤖 Starting autonomous mode (TODO.md based execution)...\n"));
+      await kernel.runAutonomous();
+    } else if (args[0] === "c3l") {
+      // C3Lコマンド実行モード
+      // 使用例: node index.ts c3l implement code "Create multiply function"
+      if (args.length < 3) {
+        console.log(chalk.red("Usage: node index.ts c3l <directive> <layer> [description]"));
+        console.log(chalk.gray("Example: node index.ts c3l implement code \"Create add function\""));
+        process.exit(1);
       }
 
-      // タスク完了処理
-      lines[taskIndex] = taskLine.replace("- [ ]", "- [x]");
-      await fs.writeFile(TODO_FILE, lines.join("\n"));
+      const directive = args[1];
+      const layer = args[2];
+      const description = args.slice(3).join(" ") || "No description provided";
 
-    } catch (error: any) {
-      console.error(chalk.red(`  💥 Task Failed: ${error.message}`));
-      await logSystem(`Error: ${error.message}`);
+      const result = await kernel.executeC3L(directive, layer, {
+        input_content: description
+      });
 
-      // リトライ戦略: タスクを少し書き換えて「失敗回数」を記録する等の処理が可能
-      // 今回は無限ループ防止のため、スキップせずにログだけ残して停止
-      break;
+      if (!result.success) {
+        process.exit(1);
+      }
+
+    } else if (args[0] === "shell") {
+      // シェルコマンド実行モード
+      // 使用例: node index.ts shell "npm test"
+      const command = args.slice(1).join(" ");
+      await kernel.executeShell(command);
+
+    } else if (args[0] === "list") {
+      // C3Lコマンド一覧表示
+      console.log(chalk.cyan("📋 Available C3L Commands:\n"));
+      const commands = await kernel.listC3LCommands();
+      commands.forEach(cmd => console.log(chalk.white("  " + cmd)));
+
+    } else {
+      console.log(chalk.red("Unknown command. Available commands:"));
+      console.log(chalk.gray("  node index.ts              - Autonomous mode (TODO.md)"));
+      console.log(chalk.gray("  node index.ts c3l <directive> <layer> <desc> - Execute C3L command"));
+      console.log(chalk.gray("  node index.ts shell <command> - Execute shell command"));
+      console.log(chalk.gray("  node index.ts list         - List C3L commands"));
+      process.exit(1);
     }
 
-    // APIレート制限回避のための休憩
-    await new Promise(r => setTimeout(r, 2000));
+    console.log(chalk.bold.green("\n✅ Iori Kernel v3.0: Execution completed successfully\n"));
+
+  } catch (error: any) {
+    console.error(chalk.bold.red("\n❌ Kernel Error:"), error.message);
+    console.error(chalk.gray(error.stack));
+    process.exit(1);
   }
 }
 
