@@ -2,7 +2,7 @@
 
 **Project:** Iori v3.0
 **Last Updated:** 2025-12-21
-**Overall Progress:** 45% (9/20 required items)
+**Overall Progress:** 55% (11/20 required items)
 
 ---
 
@@ -14,12 +14,12 @@
 
 ---
 
-## 2. Functionality (2/5 = 40%)
+## 2. Functionality (4/5 = 80%)
 - [x] 主要ユースケースが動作する（手順が EVIDENCE にある）
-- [ ] すべてのユースケースが動作する
+- [x] すべてのユースケースが動作する
 - [ ] エラー時の挙動が定義されている（入力不正、失敗時）
-- [ ] Mock Snapshot機能が動作する
-- [ ] DoD進捗率表示が動作する
+- [x] Mock Snapshot機能が動作する
+- [x] DoD進捗率表示が動作する
 
 ---
 
@@ -60,12 +60,12 @@
 | Category | Progress | Status |
 |----------|----------|--------|
 | **Spec** | 75% (3/4) | 🟡 In Progress |
-| **Functionality** | 40% (2/5) | 🔴 Blocked |
+| **Functionality** | 80% (4/5) | 🟢 Nearly Complete |
 | **Proof** | 40% (2/5) | 🔴 Blocked |
 | **Operability** | 50% (2/4) | 🟡 In Progress |
 | **Safety** | 0% (0/3) | 🔴 Not Started |
 | **Release** | 0% (0/4) | 🔴 Not Started |
-| **Overall** | **45% (9/20)** | 🔴 In Progress |
+| **Overall** | **55% (11/20)** | 🟡 In Progress |
 
 ---
 

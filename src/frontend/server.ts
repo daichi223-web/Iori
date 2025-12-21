@@ -292,9 +292,35 @@ app.post("/api/cloud/action", async (req, res) => {
     // Build command from action
     const cloudAction: any = { service, action };
     const cmdSpec = buildCommand(cloudAction);
-    const fullCmd = `${cmdSpec.cmd} ${cmdSpec.args.join(" ")}`;
 
-    // Execute command
+    // Special handling for login commands (interactive browser-based auth)
+    if (action === "login") {
+      const { spawn } = await import("child_process");
+
+      // Launch login command in detached mode with inherited stdio
+      // This allows the CLI tool to open a browser and interact with the user
+      const child = spawn(cmdSpec.cmd, cmdSpec.args, {
+        stdio: "inherit",  // ✅ User interacts directly with CLI
+        detached: true,    // ✅ Process runs independently
+        shell: true,       // ✅ Ensure command works on all platforms
+        cwd: projectRoot
+      });
+
+      // Don't wait for completion - let it run in background
+      child.unref();
+
+      res.json({
+        service,
+        action,
+        description: cmdSpec.description,
+        message: `Login flow launched for ${service}. Please complete authentication in the opened window.`,
+        success: true
+      });
+      return;
+    }
+
+    // For non-login commands, use execPromise
+    const fullCmd = `${cmdSpec.cmd} ${cmdSpec.args.join(" ")}`;
     const { stdout, stderr } = await execPromise(fullCmd, {
       timeout: 120000, // 2 minutes for cloud operations
       maxBuffer: 1024 * 1024 * 10, // 10MB buffer

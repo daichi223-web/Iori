@@ -1,7 +1,7 @@
 {
   "name": "ai-dev-system",
-  "version": "1.0.0",
-  "description": "ZEAMi-style Multi-Agent Autonomous Development System",
+  "version": "3.0.0",
+  "description": "Iori v3.0 - Autonomous AI Development OS with Multi-Brain Architecture",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
