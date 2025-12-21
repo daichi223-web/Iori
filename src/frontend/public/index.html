@@ -1,314 +1,749 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iori v3.0 - Dashboard</title>
-    <style>
-        /* Apple Human Interface Guidelines準拠 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iori OS - Core System Reactor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    .font-sci-fi { font-family: 'Orbitron', sans-serif; }
+    .font-mono-data { font-family: 'Roboto Mono', monospace; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #F5F5F7 0%, #E8E8EA 100%);
-            color: #1D1D1F;
-            min-height: 100vh;
-            padding: 20px;
-        }
+    body {
+      background-color: #0f172a;
+      background-image: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      min-height: 100vh;
+    }
 
-        /* ヘッダー: すりガラス効果 */
-        header {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 16px;
-            padding: 20px 30px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 12s linear infinite;
+    }
+    @keyframes spin-reverse-slow {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .animate-spin-reverse-slow {
+      animation: spin-reverse-slow 15s linear infinite;
+    }
 
-        .logo {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #007AFF 0%, #5856D6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .glow-blue { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)); }
+    .glow-red { filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.9)); }
+    .glow-green { filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8)); }
+    .glow-violet { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
+    .glow-cyan { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.8)); }
 
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(52, 199, 89, 0.1);
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #34C759;
-        }
+    .core-segment {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      transition: all 0.5s ease;
+    }
+    .segment-top { clip-path: polygon(50% 50%, 0 0, 100% 0); }
+    .segment-right { clip-path: polygon(50% 50%, 100% 0, 100% 100%, 50% 100%); }
+    .segment-left { clip-path: polygon(50% 50%, 0 100%, 0 0); }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #34C759;
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
+    .scanline {
+      background: linear-gradient(transparent 50%, rgba(59, 130, 246, 0.08) 50%);
+      background-size: 100% 3px;
+      pointer-events: none;
+    }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* メインコンテナ */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        /* カードスタイル */
-        .card {
-            background: #FFFFFF;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: #1D1D1F;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-icon {
-            font-size: 24px;
-        }
-
-        /* ログエリア */
-        .log-container {
-            grid-column: 1 / -1;
-        }
-
-        .log-list {
-            background: #F5F5F7;
-            border-radius: 8px;
-            padding: 16px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .log-item {
-            background: #FFFFFF;
-            border-radius: 6px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-family: "SF Mono", Monaco, "Courier New", monospace;
-            color: #3A3A3C;
-            border-left: 3px solid #007AFF;
-            transition: background 0.2s ease;
-        }
-
-        .log-item:hover {
-            background: #F9F9F9;
-        }
-
-        .log-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .log-time {
-            color: #8E8E93;
-            font-size: 11px;
-            margin-right: 12px;
-        }
-
-        .log-message {
-            color: #1D1D1F;
-        }
-
-        /* メトリクスカード */
-        .metric {
-            text-align: center;
-            padding: 16px;
-            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-            color: white;
-            border-radius: 12px;
-            margin-top: 12px;
-        }
-
-        .metric-value {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* スクロールバーカスタマイズ */
-        .log-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .log-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .log-list::-webkit-scrollbar-thumb {
-            background: #C7C7CC;
-            border-radius: 4px;
-        }
-
-        .log-list::-webkit-scrollbar-thumb:hover {
-            background: #AEAEB2;
-        }
-
-        /* レスポンシブ */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    .hud-panel {
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 20px rgba(59, 130, 246, 0.05);
+    }
+  </style>
 </head>
-<body>
-    <header>
-        <div class="logo">🌌 Iori v3.0</div>
-        <div class="status-badge">
-            <span class="status-dot"></span>
-            <span>System Online</span>
-        </div>
-    </header>
+<body class="text-blue-100 p-3 md:p-6 flex flex-col relative overflow-hidden">
 
-    <div class="container">
-        <!-- ステータスカード -->
-        <div class="card">
-            <div class="card-title">
-                <span class="card-icon">📊</span>
-                Status
-            </div>
-            <div class="metric">
-                <div class="metric-value" id="uptime">--</div>
-                <div class="metric-label">Uptime (seconds)</div>
-            </div>
-        </div>
+  <!-- Grid Background -->
+  <div class="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.05)_1px,transparent_1px)] bg-[length:40px_40px] pointer-events-none z-0"></div>
 
-        <!-- タスクカード -->
-        <div class="card">
-            <div class="card-title">
-                <span class="card-icon">✅</span>
-                Tasks
-            </div>
-            <div class="metric">
-                <div class="metric-value" id="task-count">--</div>
-                <div class="metric-label">Total Tasks</div>
-            </div>
-        </div>
-
-        <!-- ログカード -->
-        <div class="card log-container">
-            <div class="card-title">
-                <span class="card-icon">📝</span>
-                System Logs
-            </div>
-            <div class="log-list" id="log-list">
-                <div class="log-item">
-                    <span class="log-time">Initializing...</span>
-                    <span class="log-message">Loading logs from server...</span>
-                </div>
-            </div>
-        </div>
+  <!-- Header HUD Badge -->
+  <header class="relative z-10 flex justify-end mb-3">
+    <div class="hud-panel bg-slate-800/80 border border-blue-500/30 rounded-lg p-2 px-4 flex items-center gap-4 text-xs font-mono-data">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-emerald-400 font-bold tracking-wider">ONLINE</span>
+      </div>
+      <div class="h-4 w-px bg-blue-500/30 hidden md:block"></div>
+      <div class="hidden md:flex gap-3 opacity-70">
+        <span>CPU: <span id="cpu-hud" class="text-cyan-300">7%</span></span>
+        <span>MEM: <span id="mem-hud" class="text-cyan-300">210MB</span></span>
+      </div>
     </div>
+  </header>
 
-    <script>
-        // APIからデータを取得
-        async function fetchStatus() {
-            try {
-                const res = await fetch('/api/status');
-                const data = await res.json();
-                document.getElementById('uptime').textContent = Math.floor(data.uptime);
-            } catch (e) {
-                console.error('Failed to fetch status:', e);
-            }
+  <div class="relative z-10 flex-1 flex flex-col lg:flex-row gap-4">
+
+    <!-- Left Sidebar: Controls -->
+    <aside class="w-full lg:w-80 space-y-3">
+
+      <!-- Cloud Services -->
+      <div class="hud-panel bg-slate-800/70 border border-blue-500/40 rounded-xl overflow-hidden">
+        <div class="bg-blue-900/30 px-3 py-2 border-b border-blue-500/30">
+          <h3 class="text-xs font-sci-fi text-blue-300 tracking-widest glow-blue">CLOUD SERVICES</h3>
+        </div>
+        <div class="p-3 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-slate-500 rounded-full" id="github-status"></div>
+              <span class="text-slate-300 font-mono-data">GitHub</span>
+            </div>
+            <button id="btn-gh-login" class="px-2 py-0.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded text-blue-300 transition-all font-mono-data">🔑</button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-slate-500 rounded-full" id="vercel-status"></div>
+              <span class="text-slate-300 font-mono-data">Vercel</span>
+            </div>
+            <button id="btn-vercel-login" class="px-2 py-0.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded text-blue-300 transition-all font-mono-data">🔑</button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-slate-500 rounded-full" id="firebase-status"></div>
+              <span class="text-slate-300 font-mono-data">Firebase</span>
+            </div>
+            <button id="btn-firebase-login" class="px-2 py-0.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded text-blue-300 transition-all font-mono-data">🔑</button>
+          </div>
+          <div class="pt-2 border-t border-slate-700/50 flex gap-2">
+            <button id="btn-git-sync" class="flex-1 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded text-xs font-semibold text-emerald-400 transition-all font-mono-data">📤 Sync</button>
+            <button id="btn-vercel-deploy" class="flex-1 px-3 py-1.5 bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/50 rounded text-xs font-semibold text-violet-400 transition-all font-mono-data">🚀 Deploy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Brains -->
+      <div class="hud-panel bg-slate-800/70 border border-violet-500/40 rounded-xl overflow-hidden">
+        <div class="bg-violet-900/30 px-3 py-2 border-b border-violet-500/30">
+          <h3 class="text-xs font-sci-fi text-violet-300 tracking-widest glow-violet">AI BRAINS</h3>
+        </div>
+        <div class="p-3 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-slate-500 rounded-full" id="claude-status"></div>
+              <span class="text-slate-300 font-mono-data">Claude</span>
+              <span class="text-slate-500 text-xs" id="claude-status-text">...</span>
+            </div>
+            <button id="btn-claude-login" class="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded text-emerald-400 transition-all font-mono-data">🔑</button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-slate-500 rounded-full" id="codex-status"></div>
+              <span class="text-slate-300 font-mono-data">Codex</span>
+              <span class="text-slate-500 text-xs" id="codex-status-text">...</span>
+            </div>
+            <button id="btn-codex-login" class="px-2 py-0.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded text-blue-400 transition-all font-mono-data">🔑</button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-slate-500 rounded-full" id="gemini-status"></div>
+              <span class="text-slate-300 font-mono-data">Gemini</span>
+              <span class="text-slate-500 text-xs" id="gemini-status-text">...</span>
+            </div>
+            <button id="btn-gemini-login" class="px-2 py-0.5 bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/50 rounded text-violet-400 transition-all font-mono-data">🔑</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neural Console -->
+      <div class="hud-panel bg-slate-800/70 border border-cyan-500/40 rounded-xl overflow-hidden">
+        <div class="bg-cyan-900/30 px-3 py-2 border-b border-cyan-500/30">
+          <h3 class="text-xs font-sci-fi text-cyan-300 tracking-widest glow-cyan">NEURAL CONSOLE</h3>
+        </div>
+        <div class="p-3 space-y-2">
+          <div class="bg-slate-950/60 rounded p-2 text-xs font-mono-data max-h-32 overflow-y-auto scanline">
+            <div id="command-output" class="space-y-1 text-cyan-200"></div>
+          </div>
+
+          <!-- Deep Research Toggle -->
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <input type="checkbox" id="deep-research-toggle" class="hidden" />
+              <div class="relative">
+                <div id="toggle-bg" class="w-10 h-5 bg-slate-700 rounded-full transition-all duration-300 border border-slate-600"></div>
+                <div id="toggle-slider" class="absolute top-0.5 left-0.5 w-4 h-4 bg-slate-400 rounded-full transition-all duration-300"></div>
+              </div>
+              <span class="text-xs font-semibold transition-all duration-300 font-mono-data" id="toggle-label">
+                <span class="text-slate-400">Deep Research</span>
+              </span>
+            </label>
+          </div>
+
+          <input
+            id="command-input"
+            type="text"
+            placeholder="$ Enter command..."
+            class="w-full bg-slate-900/80 border border-cyan-500/50 rounded px-2 py-1.5 text-xs font-mono-data text-cyan-300 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 placeholder-slate-600"
+          />
+        </div>
+      </div>
+
+      <!-- Completion Panel (DoD Progress) -->
+      <div class="hud-panel bg-slate-800/70 border border-violet-500/40 rounded-xl overflow-hidden">
+        <div class="bg-violet-900/30 px-3 py-2 border-b border-violet-500/30">
+          <h3 class="text-xs font-sci-fi text-violet-300 tracking-widest glow-violet">COMPLETION STATUS</h3>
+        </div>
+        <div class="p-3 space-y-3">
+          <!-- Overall Progress -->
+          <div>
+            <div class="flex justify-between text-xs font-mono-data mb-1">
+              <span class="text-violet-300">Overall Progress</span>
+              <span id="dod-overall-percent" class="text-violet-400 font-bold">0%</span>
+            </div>
+            <div class="w-full bg-slate-900/60 rounded-full h-3 overflow-hidden">
+              <div id="dod-overall-bar" class="bg-gradient-to-r from-violet-500 to-violet-600 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Section Progress -->
+          <div class="space-y-2 text-xs font-mono-data">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Spec</span>
+              <span id="dod-spec-percent" class="text-violet-300">0%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Functionality</span>
+              <span id="dod-functionality-percent" class="text-violet-300">0%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Proof</span>
+              <span id="dod-proof-percent" class="text-violet-300">0%</span>
+            </div>
+          </div>
+
+          <!-- Next Action -->
+          <div class="pt-2 border-t border-slate-700/50">
+            <div class="text-xs font-sci-fi text-violet-400 mb-1">NEXT ACTION</div>
+            <div id="dod-next-action" class="text-xs font-mono-data text-slate-300 bg-slate-900/40 rounded p-2">
+              Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Center: Core Reactor -->
+    <main class="flex-1 flex items-center justify-center relative py-8">
+
+      <div class="relative w-[300px] h-[300px] md:w-[450px] md:h-[450px] lg:w-[550px] lg:h-[550px] flex items-center justify-center">
+
+        <!-- Outer Alert Ring (Conditional) -->
+        <div id="alert-ring" class="absolute inset-0 rounded-full border-4 md:border-8 border-red-600/0 transition-all z-30"></div>
+        <div id="alert-ring-dashed" class="absolute inset-4 md:inset-8 rounded-full border-2 border-dashed border-red-500/0 animate-spin-reverse-slow z-30"></div>
+
+        <!-- Top Warning Label (Conditional) -->
+        <div id="warning-label" class="absolute -top-12 md:-top-16 left-1/2 -translate-x-1/2 text-center z-40 w-full hidden">
+          <div class="inline-block bg-red-950/80 border border-red-500 px-4 py-2 rounded animate-bounce">
+            <h2 class="font-sci-fi text-red-400 text-sm md:text-base tracking-widest flex items-center gap-2 justify-center">
+              ⚠️ <span id="warning-title">SHIELD BREACH</span>
+            </h2>
+            <p class="font-mono-data text-xs text-red-300" id="warning-subtitle">SYSTEM ERROR</p>
+          </div>
+          <div class="h-8 w-px bg-red-500 mx-auto glow-red"></div>
+        </div>
+
+        <!-- Main Rotating Rings -->
+        <div class="absolute inset-12 md:inset-20 lg:inset-24 rounded-full border-[6px] md:border-[10px] border-t-blue-500 border-r-cyan-400 border-b-blue-700 border-l-transparent animate-spin-slow glow-blue z-20 opacity-90"></div>
+        <div class="absolute inset-16 md:inset-24 lg:inset-32 rounded-full border-2 border-dashed border-cyan-300/50 animate-spin-slow z-20"></div>
+
+        <!-- Side Status Panels -->
+        <div class="hidden lg:block absolute right-[-200px] top-1/2 -translate-y-1/2 z-40 text-left w-[180px]">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-12 h-px bg-cyan-500 glow-cyan"></div>
+            <h2 class="font-sci-fi text-cyan-400 text-sm tracking-widest">ENGINE</h2>
+          </div>
+          <div class="font-mono-data text-xs text-cyan-200 bg-slate-900/80 p-3 rounded border-l-2 border-cyan-500">
+            <p class="text-emerald-400" id="engine-status">Standby</p>
+            <p class="text-slate-400">Progress: <span id="engine-progress" class="text-cyan-300">0%</span></p>
+            <div class="mt-2 h-1 bg-slate-800 rounded overflow-hidden">
+              <div id="engine-bar" class="h-full bg-cyan-500 transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Core Center -->
+        <div class="absolute inset-24 md:inset-36 lg:inset-44 bg-slate-900 rounded-full border-4 border-slate-700 flex items-center justify-center overflow-hidden z-10 glow-blue">
+
+          <!-- 3 Segments -->
+          <div id="segment-spec" class="core-segment segment-top bg-slate-800/80"></div>
+          <div id="segment-code" class="core-segment segment-right bg-slate-800/80"></div>
+          <div id="segment-proof" class="core-segment segment-left bg-slate-800/80"></div>
+
+          <div class="absolute z-20 text-center">
+            <p class="font-sci-fi text-xs md:text-sm text-slate-400 tracking-widest mb-1">CORE</p>
+            <p class="font-mono-data text-lg md:text-2xl font-bold text-white glow-blue" id="core-status">STANDBY</p>
+          </div>
+        </div>
+
+        <div class="hidden lg:block absolute left-[-200px] top-1/2 -translate-y-1/2 z-40 text-right w-[180px]">
+          <div class="flex items-center gap-2 mb-2 justify-end">
+            <h2 class="font-sci-fi text-blue-400 text-sm tracking-widest">SPEC</h2>
+            <div class="w-12 h-px bg-blue-500 glow-blue"></div>
+          </div>
+          <div class="font-mono-data text-xs text-blue-200 bg-slate-900/80 p-3 rounded border-r-2 border-blue-500">
+            <p class="text-emerald-400" id="spec-done">0 Done</p>
+            <p class="text-amber-400" id="spec-wip">0 WIP</p>
+            <p class="text-slate-500" id="spec-todo">0 Todo</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Right Sidebar: System Log -->
+    <aside class="w-full lg:w-80">
+      <div class="hud-panel bg-slate-800/70 border border-emerald-500/40 rounded-xl overflow-hidden h-full flex flex-col">
+        <div class="bg-emerald-900/30 px-3 py-2 border-b border-emerald-500/30">
+          <h3 class="text-xs font-sci-fi text-emerald-300 tracking-widest glow-green">SYSTEM LOG</h3>
+        </div>
+        <div class="p-3 flex-1 flex flex-col">
+          <div class="bg-slate-950/60 rounded p-3 text-xs text-blue-200 font-mono-data flex-1 overflow-y-auto max-h-[600px] relative scanline">
+            <div id="log-output" class="space-y-1 opacity-90">
+              <p class="text-slate-500">[System initializing...]</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const elements = {
+      logOutput: document.getElementById('log-output'),
+      commandOutput: document.getElementById('command-output'),
+      commandInput: document.getElementById('command-input'),
+      cpuHud: document.getElementById('cpu-hud'),
+      memHud: document.getElementById('mem-hud'),
+      coreStatus: document.getElementById('core-status'),
+      engineStatus: document.getElementById('engine-status'),
+      engineProgress: document.getElementById('engine-progress'),
+      engineBar: document.getElementById('engine-bar'),
+      specDone: document.getElementById('spec-done'),
+      specWip: document.getElementById('spec-wip'),
+      specTodo: document.getElementById('spec-todo'),
+      segmentSpec: document.getElementById('segment-spec'),
+      segmentCode: document.getElementById('segment-code'),
+      segmentProof: document.getElementById('segment-proof'),
+      alertRing: document.getElementById('alert-ring'),
+      alertRingDashed: document.getElementById('alert-ring-dashed'),
+      warningLabel: document.getElementById('warning-label'),
+      warningTitle: document.getElementById('warning-title'),
+      warningSubtitle: document.getElementById('warning-subtitle')
+    };
+
+    let commandHistory = [];
+    let runNumber = 0;
+
+    function formatUptime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    async function updateUI() {
+      try {
+        const statusRes = await fetch('/api/status');
+        const status = await statusRes.json();
+
+        if (status.status === 'online') {
+          if (elements.cpuHud) elements.cpuHud.textContent = `${status.cpu?.load || 0}%`;
+          if (elements.memHud) elements.memHud.textContent = `${Math.round((status.memory?.active || 0) / 1024 / 1024)}MB`;
+          if (elements.coreStatus) elements.coreStatus.textContent = 'ACTIVE';
         }
 
-        async function fetchLogs() {
-            try {
-                const res = await fetch('/api/logs');
-                const data = await res.json();
-                const logList = document.getElementById('log-list');
+        const logsRes = await fetch('/api/logs');
+        const logs = await logsRes.json();
 
-                if (data.lines && data.lines.length > 0) {
-                    logList.innerHTML = data.lines.slice(-10).reverse().map(line => {
-                        const match = line.match(/^\[(.*?)\]\s*(.*)$/);
-                        if (match) {
-                            return `
-                                <div class="log-item">
-                                    <span class="log-time">${match[1]}</span>
-                                    <span class="log-message">${match[2]}</span>
-                                </div>
-                            `;
-                        }
-                        return `
-                            <div class="log-item">
-                                <span class="log-message">${line}</span>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    logList.innerHTML = '<div class="log-item"><span class="log-message">No logs available</span></div>';
-                }
-            } catch (e) {
-                console.error('Failed to fetch logs:', e);
+        if (logs.lines && logs.lines.length > 0) {
+          const logLines = logs.lines.slice(-40).map(line => {
+            let escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            if (escaped.includes('Autonomous mode started') || escaped.includes('Executing C3L')) {
+              runNumber++;
+              return `<div class="my-2 border-t border-emerald-500/30 pt-2"><div class="text-emerald-400 font-bold glow-green">▶ RUN #${runNumber}</div></div>`;
             }
+
+            let colored = escaped
+              .replace(/\[CLAUDE\]/gi, '<span class="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded text-xs font-semibold border border-emerald-500/30">CLAUDE</span>')
+              .replace(/\[GEMINI\]/gi, '<span class="bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded text-xs font-semibold border border-violet-500/30">GEMINI</span>')
+              .replace(/\[CODEX\]/gi, '<span class="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-xs font-semibold border border-blue-500/30">CODEX</span>')
+              .replace(/\[SHELL\]/gi, '<span class="bg-slate-500/20 text-slate-400 px-1.5 py-0.5 rounded text-xs font-semibold border border-slate-500/30">SHELL</span>')
+              .replace(/\[SUCCESS\]/gi, '<span class="text-emerald-400 font-semibold glow-green">SUCCESS</span>')
+              .replace(/\[ERROR\]/gi, '<span class="text-red-400 font-semibold glow-red">ERROR</span>')
+              .replace(/\[INFO\]/gi, '<span class="text-blue-400">INFO</span>')
+              .replace(/\[ACTION REQUIRED\]/gi, '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded font-semibold animate-pulse border border-red-500/50">⚠ ACTION REQUIRED</span>');
+
+            return `<div class="text-slate-400">${colored}</div>`;
+          }).join('');
+
+          if (elements.logOutput) {
+            elements.logOutput.innerHTML = logLines;
+            appendCommandHistory();
+            elements.logOutput.scrollTop = elements.logOutput.scrollHeight;
+          }
         }
 
-        async function fetchTodos() {
-            try {
-                const res = await fetch('/api/todos');
-                const data = await res.json();
-                document.getElementById('task-count').textContent = data.count || 0;
-            } catch (e) {
-                console.error('Failed to fetch todos:', e);
+        const todosRes = await fetch('/api/todos');
+        const todos = await todosRes.json();
+
+        if (todos.lines && todos.lines.length > 0) {
+          const totalTasks = todos.lines.filter(l => l.includes('- [')).length;
+          const completedTasks = todos.lines.filter(l => l.includes('- [x]')).length;
+          const wipTasks = todos.lines.filter(l => l.includes('- [>]') || l.includes('WIP')).length;
+          const todoTasks = todos.lines.filter(l => l.includes('- [ ]')).length;
+
+          if (elements.specDone) elements.specDone.textContent = `${completedTasks} Done`;
+          if (elements.specWip) elements.specWip.textContent = `${wipTasks} WIP`;
+          if (elements.specTodo) elements.specTodo.textContent = `${todoTasks} Todo`;
+
+          // Update core segments based on progress
+          const specProgress = totalTasks > 0 ? (completedTasks / totalTasks) : 0;
+          if (elements.segmentSpec) {
+            if (specProgress > 0.7) {
+              elements.segmentSpec.className = 'core-segment segment-top bg-emerald-500/80 glow-green';
+            } else if (specProgress > 0.3) {
+              elements.segmentSpec.className = 'core-segment segment-top bg-amber-500/80 animate-pulse';
+            } else {
+              elements.segmentSpec.className = 'core-segment segment-top bg-slate-800/80';
             }
+          }
+
+          // Check for errors in logs to show alert
+          const hasErrors = logs.lines.some(l => l.includes('[ERROR]'));
+          if (hasErrors && elements.alertRing && elements.warningLabel) {
+            elements.alertRing.className = 'absolute inset-0 rounded-full border-4 md:border-8 border-red-600/80 animate-pulse glow-red z-30';
+            elements.alertRingDashed.className = 'absolute inset-4 md:inset-8 rounded-full border-2 border-dashed border-red-500/30 animate-spin-reverse-slow z-30';
+            elements.warningLabel.classList.remove('hidden');
+            if (elements.warningTitle) elements.warningTitle.textContent = 'SYSTEM ERROR';
+            if (elements.warningSubtitle) elements.warningSubtitle.textContent = 'CHECK LOGS';
+          } else if (elements.alertRing) {
+            elements.alertRing.className = 'absolute inset-0 rounded-full border-4 md:border-8 border-red-600/0 transition-all z-30';
+            elements.alertRingDashed.className = 'absolute inset-4 md:inset-8 rounded-full border-2 border-dashed border-red-500/0 animate-spin-reverse-slow z-30';
+            if (elements.warningLabel) elements.warningLabel.classList.add('hidden');
+          }
         }
 
-        // 初回読み込み
-        fetchStatus();
-        fetchLogs();
-        fetchTodos();
+        // Update DoD Progress (Completion Panel)
+        try {
+          const progressRes = await fetch('/api/progress');
+          if (progressRes.ok) {
+            const progress = await progressRes.json();
 
-        // 2秒ごとに自動更新
-        setInterval(() => {
-            fetchStatus();
-            fetchLogs();
-            fetchTodos();
-        }, 2000);
-    </script>
+            // Update overall progress
+            const overallPercent = progress.overall?.percentage || 0;
+            const dodOverallPercent = document.getElementById('dod-overall-percent');
+            const dodOverallBar = document.getElementById('dod-overall-bar');
+            if (dodOverallPercent) dodOverallPercent.textContent = `${overallPercent}%`;
+            if (dodOverallBar) dodOverallBar.style.width = `${overallPercent}%`;
+
+            // Update section progress
+            if (progress.sections) {
+              const specPercent = progress.sections['Spec']?.percentage || 0;
+              const funcPercent = progress.sections['Functionality']?.percentage || 0;
+              const proofPercent = progress.sections['Proof']?.percentage || 0;
+
+              const dodSpecPercent = document.getElementById('dod-spec-percent');
+              const dodFunctionalityPercent = document.getElementById('dod-functionality-percent');
+              const dodProofPercent = document.getElementById('dod-proof-percent');
+
+              if (dodSpecPercent) dodSpecPercent.textContent = `${specPercent}%`;
+              if (dodFunctionalityPercent) dodFunctionalityPercent.textContent = `${funcPercent}%`;
+              if (dodProofPercent) dodProofPercent.textContent = `${proofPercent}%`;
+            }
+
+            // Update next action
+            const nextAction = progress.nextActions?.[0] || progress.recommendedWorkUnit || 'All tasks completed!';
+            const dodNextAction = document.getElementById('dod-next-action');
+            if (dodNextAction) dodNextAction.textContent = nextAction;
+          }
+        } catch (e) {
+          console.error('Failed to load DoD progress:', e);
+        }
+
+      } catch (error) {
+        console.error('Failed to update UI:', error);
+      }
+    }
+
+    function appendCommandHistory() {
+      if (commandHistory.length > 0 && elements.logOutput) {
+        const separator = `<div class="my-3 border-t border-cyan-500/30 relative"><div class="absolute -top-3 left-0 bg-slate-950/60 px-2 text-xs text-cyan-400 glow-cyan">▼ Command History</div></div>`;
+        elements.logOutput.innerHTML += separator + commandHistory.join('');
+      }
+    }
+
+    function displayCommandHistory(html) {
+      if (elements.commandOutput) {
+        elements.commandOutput.innerHTML += html;
+        elements.commandOutput.scrollTop = elements.commandOutput.scrollHeight;
+      }
+    }
+
+    async function executeCommand(command) {
+      if (!command || !command.trim()) return;
+
+      const deepResearchEnabled = deepResearchToggle?.checked || false;
+
+      if (elements.engineStatus) elements.engineStatus.textContent = 'Processing...';
+      if (elements.engineStatus) elements.engineStatus.className = 'text-cyan-400 animate-pulse';
+
+      commandHistory.push(`<div class="my-2"><span class="text-cyan-400 glow-cyan">$ ${command}</span>${deepResearchEnabled ? ' <span class="text-violet-400 text-xs glow-violet">🧠 Deep Research</span>' : ''}</div>`);
+
+      try {
+        const response = await fetch('/api/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            command,
+            deepResearch: deepResearchEnabled
+          })
+        });
+
+        const result = await response.json();
+        const output = result.stdout || result.stderr || 'No output';
+        const escaped = output.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const outputLines = `<div class="text-emerald-300 whitespace-pre-wrap text-xs">${escaped}</div>`;
+
+        commandHistory.push(outputLines);
+        displayCommandHistory(`<div class="my-2"><span class="text-cyan-400 glow-cyan">$ ${command}</span>${deepResearchEnabled ? ' <span class="text-violet-400 text-xs glow-violet">🧠 Deep Research</span>' : ''}</div>${outputLines}`);
+
+        if (elements.engineStatus) {
+          elements.engineStatus.textContent = result.success ? 'Complete' : 'Error';
+          elements.engineStatus.className = result.success ? 'text-emerald-400 glow-green' : 'text-red-400 glow-red';
+        }
+
+      } catch (error) {
+        const errorMsg = `<div class="text-red-400 glow-red">Error: ${error.message}</div>`;
+        commandHistory.push(errorMsg);
+        displayCommandHistory(errorMsg);
+        if (elements.engineStatus) {
+          elements.engineStatus.textContent = 'Failed';
+          elements.engineStatus.className = 'text-red-400 glow-red';
+        }
+      }
+    }
+
+    const deepResearchToggle = document.getElementById('deep-research-toggle');
+    const toggleBg = document.getElementById('toggle-bg');
+    const toggleSlider = document.getElementById('toggle-slider');
+    const toggleLabel = document.getElementById('toggle-label');
+
+    if (deepResearchToggle) {
+      deepResearchToggle.addEventListener('change', () => {
+        if (deepResearchToggle.checked) {
+          toggleBg.className = 'w-10 h-5 bg-violet-600 rounded-full transition-all duration-300 border border-violet-400 shadow-[0_0_20px_rgba(139,92,246,0.6)]';
+          toggleSlider.className = 'absolute top-0.5 right-0.5 w-4 h-4 bg-violet-300 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(139,92,246,0.8)]';
+          toggleLabel.innerHTML = '<span class="text-violet-400 font-bold glow-violet">🧠 Deep Research</span>';
+        } else {
+          toggleBg.className = 'w-10 h-5 bg-slate-700 rounded-full transition-all duration-300 border border-slate-600';
+          toggleSlider.className = 'absolute top-0.5 left-0.5 w-4 h-4 bg-slate-400 rounded-full transition-all duration-300';
+          toggleLabel.innerHTML = '<span class="text-slate-400">Deep Research</span>';
+        }
+      });
+    }
+
+    if (elements.commandInput) {
+      elements.commandInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          executeCommand(elements.commandInput.value);
+          elements.commandInput.value = '';
+        }
+      });
+    }
+
+    async function executeCloudAction(service, action, buttonId) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+
+      button.disabled = true;
+      const originalText = button.textContent;
+      button.textContent = "⏳";
+
+      try {
+        const response = await fetch('/api/cloud/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service, action })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          displayCommandHistory(`<div class="my-2"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded font-semibold border border-emerald-500/50">${service.toUpperCase()}: ${action}</span></div>`);
+
+          if (result.stdout) {
+            displayCommandHistory(`<div class="text-emerald-300 whitespace-pre-wrap text-xs">${result.stdout.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`);
+          }
+
+          const statusElId = service === 'gh' ? 'github-status' : `${service}-status`;
+          const statusEl = document.getElementById(statusElId);
+          if (statusEl) statusEl.className = `w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]`;
+
+          if (action === 'login') setTimeout(() => checkCloudStatus(), 1500);
+
+          button.textContent = "✓";
+          setTimeout(() => { button.textContent = originalText; }, 2000);
+        } else {
+          displayCommandHistory(`<div class="text-red-400 glow-red">Error: ${result.error || result.stderr}</div>`);
+          button.textContent = "✗";
+          setTimeout(() => { button.textContent = originalText; }, 2000);
+        }
+      } catch (error) {
+        displayCommandHistory(`<div class="text-red-400 glow-red">Failed: ${error.message}</div>`);
+        button.textContent = "✗";
+        setTimeout(() => { button.textContent = originalText; }, 2000);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    const gitSyncBtn = document.getElementById('btn-git-sync');
+    const vercelDeployBtn = document.getElementById('btn-vercel-deploy');
+    const ghLoginBtn = document.getElementById('btn-gh-login');
+    const vercelLoginBtn = document.getElementById('btn-vercel-login');
+    const firebaseLoginBtn = document.getElementById('btn-firebase-login');
+
+    if (gitSyncBtn) gitSyncBtn.addEventListener('click', () => executeCloudAction('git', 'syncMain', 'btn-git-sync'));
+    if (vercelDeployBtn) vercelDeployBtn.addEventListener('click', () => executeCloudAction('vercel', 'deployProd', 'btn-vercel-deploy'));
+    if (ghLoginBtn) ghLoginBtn.addEventListener('click', () => executeCloudAction('gh', 'login', 'btn-gh-login'));
+    if (vercelLoginBtn) vercelLoginBtn.addEventListener('click', () => executeCloudAction('vercel', 'login', 'btn-vercel-login'));
+    if (firebaseLoginBtn) firebaseLoginBtn.addEventListener('click', () => executeCloudAction('firebase', 'login', 'btn-firebase-login'));
+
+    async function checkCloudStatus() {
+      try {
+        const ghRes = await fetch('/api/cloud/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ service: 'gh', action: 'status' }) });
+        const ghStatus = await ghRes.json();
+        const ghStatusEl = document.getElementById('github-status');
+        if (ghStatusEl && ghStatus.success && ghStatus.stdout && ghStatus.stdout.includes('Logged in')) {
+          ghStatusEl.className = `w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]`;
+        }
+      } catch (e) { }
+
+      try {
+        const vercelRes = await fetch('/api/cloud/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ service: 'vercel', action: 'whoami' }) });
+        const vercelStatus = await vercelRes.json();
+        const vercelStatusEl = document.getElementById('vercel-status');
+        if (vercelStatusEl && vercelStatus.success && vercelStatus.stdout) {
+          vercelStatusEl.className = `w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]`;
+        }
+      } catch (e) { }
+
+      try {
+        const firebaseRes = await fetch('/api/cloud/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ service: 'firebase', action: 'projectsList' }) });
+        const firebaseStatus = await firebaseRes.json();
+        const firebaseStatusEl = document.getElementById('firebase-status');
+        if (firebaseStatusEl && firebaseStatus.success) {
+          firebaseStatusEl.className = `w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]`;
+        }
+      } catch (e) { }
+    }
+
+    let cliPollingInterval = null;
+
+    async function checkCLIToolsStatus() {
+      try {
+        const response = await fetch('/api/cli/status');
+        const data = await response.json();
+
+        if (data.success && data.tools) {
+          data.tools.forEach(toolStatus => {
+            const statusDot = document.getElementById(`${toolStatus.tool}-status`);
+            const statusText = document.getElementById(`${toolStatus.tool}-status-text`);
+
+            if (statusDot && statusText) {
+              switch (toolStatus.status) {
+                case 'ready':
+                  statusDot.className = 'w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]';
+                  statusText.textContent = 'Ready';
+                  statusText.className = 'text-xs text-emerald-400 font-semibold glow-green';
+                  break;
+                case 'not_authenticated':
+                  statusDot.className = 'w-2 h-2 bg-yellow-500 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.6)]';
+                  statusText.textContent = 'Login';
+                  statusText.className = 'text-xs text-yellow-400';
+                  break;
+                case 'not_installed':
+                  statusDot.className = 'w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]';
+                  statusText.textContent = 'N/A';
+                  statusText.className = 'text-xs text-red-400';
+                  break;
+                default:
+                  statusDot.className = 'w-2 h-2 bg-slate-500 rounded-full';
+                  statusText.textContent = '...';
+                  statusText.className = 'text-xs text-slate-500';
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to check CLI tools:', error);
+      }
+    }
+
+    async function launchCLILogin(tool, buttonId) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+
+      button.disabled = true;
+      const originalText = button.textContent;
+      button.textContent = "⏳";
+
+      try {
+        const response = await fetch('/api/cli/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tool })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          displayCommandHistory(`<div class="my-2"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded font-semibold border border-emerald-500/50">CLI: ${tool.toUpperCase()}</span></div>`);
+          displayCommandHistory(`<div class="text-cyan-300 text-xs">${result.message}</div>`);
+
+          button.textContent = "✓";
+
+          if (cliPollingInterval) clearInterval(cliPollingInterval);
+          cliPollingInterval = setInterval(checkCLIToolsStatus, 5000);
+
+          setTimeout(() => { button.textContent = originalText; }, 2000);
+        } else {
+          displayCommandHistory(`<div class="text-red-400 glow-red">Error: ${result.error}</div>`);
+          button.textContent = "✗";
+          setTimeout(() => { button.textContent = originalText; }, 2000);
+        }
+      } catch (error) {
+        displayCommandHistory(`<div class="text-red-400 glow-red">Failed: ${error.message}</div>`);
+        button.textContent = "✗";
+        setTimeout(() => { button.textContent = originalText; }, 2000);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    const claudeLoginBtn = document.getElementById('btn-claude-login');
+    const codexLoginBtn = document.getElementById('btn-codex-login');
+    const geminiLoginBtn = document.getElementById('btn-gemini-login');
+
+    if (claudeLoginBtn) claudeLoginBtn.addEventListener('click', () => launchCLILogin('claude', 'btn-claude-login'));
+    if (codexLoginBtn) codexLoginBtn.addEventListener('click', () => launchCLILogin('codex', 'btn-codex-login'));
+    if (geminiLoginBtn) geminiLoginBtn.addEventListener('click', () => launchCLILogin('gemini', 'btn-gemini-login'));
+
+    checkCloudStatus();
+    checkCLIToolsStatus();
+    updateUI();
+    setInterval(updateUI, 2000);
+  </script>
 </body>
 </html>

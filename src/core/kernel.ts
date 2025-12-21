@@ -47,9 +47,14 @@ export class IoriKernel {
   /**
    * システムログを記録
    */
-  private async log(message: string, level: "INFO" | "ERROR" | "SUCCESS" = "INFO") {
+  private async log(
+    message: string,
+    level: "INFO" | "ERROR" | "SUCCESS" = "INFO",
+    agent?: BrainProvider | "SHELL"
+  ) {
     const timestamp = new Date().toISOString();
-    const logLine = `[${timestamp}] [${level}] ${message}\n`;
+    const agentTag = agent ? `[${agent}] ` : '';
+    const logLine = `[${timestamp}] ${agentTag}[${level}] ${message}\n`;
     await fs.appendFile(this.config.logFile, logLine);
   }
 
@@ -70,7 +75,7 @@ export class IoriKernel {
 
     try {
       console.log(chalk.cyan(`\n🎯 Executing C3L: ${directive} ${layer}`));
-      await this.log(`Executing C3L: ${directive} ${layer}`);
+      await this.log(`Executing C3L: ${directive} ${layer}`, "INFO", useBrain);
 
       // Phase 1: C3L Kernelでプロンプト生成
       const prompt = await this.c3l.transpile(directive, layer, context);
@@ -94,7 +99,7 @@ export class IoriKernel {
         await fs.mkdir(path.dirname(filePath), { recursive: true });
         await fs.writeFile(filePath, content, "utf-8");
         console.log(chalk.green(`  ✅ Saved to: ${filePath}`));
-        await this.log(`File saved: ${filePath}`, "SUCCESS");
+        await this.log(`File saved: ${filePath}`, "SUCCESS", useBrain);
 
         // 自動実行が有効な場合、テストやビルドを実行
         if (this.config.autoExecute && (layer === "test" || layer === "code")) {

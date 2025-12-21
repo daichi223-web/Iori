@@ -32,20 +32,23 @@ export async function think(
 
   let command = "";
 
+  // Windows互換のためにtypeコマンドを使用（PowerShellではcatエイリアスもあるが、cmd.exeではtype）
+  const catCommand = process.platform === 'win32' ? 'type' : 'cat';
+
   switch (provider) {
     case 'CLAUDE':
       // Claude Code: 一時ファイルから読み込んで渡す
-      command = `cat "${tempFile}" | claude --print`;
+      command = `${catCommand} "${tempFile}" | claude --print`;
       break;
 
     case 'GEMINI':
       // Gemini CLI: 一時ファイルから読み込んで渡す
-      command = `cat "${tempFile}" | gemini`;
+      command = `${catCommand} "${tempFile}" | gemini`;
       break;
 
     case 'CODEX':
       // Codex CLI: 一時ファイルから読み込んで渡す
-      command = `cat "${tempFile}" | codex exec --skip-git-repo-check -`;
+      command = `${catCommand} "${tempFile}" | codex exec --skip-git-repo-check -`;
       break;
   }
 
@@ -54,8 +57,8 @@ export async function think(
     // maxBufferを増やして大きな出力に対応
     const { stdout, stderr } = await execPromise(command, {
       timeout: 300000,
-      maxBuffer: 1024 * 1024 * 20, // 20MB
-      shell: '/bin/bash'
+      maxBuffer: 1024 * 1024 * 20 // 20MB
+      // shell option removed - uses system default shell automatically
     });
 
     if (stderr) {

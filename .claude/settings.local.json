@@ -35,7 +35,31 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(rm:*)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\n✨ Iori v3.0 品質改善とUI刷新\n\n主な変更：\n- 型エラーを完全修正 \\(TypeScript strict mode準拠\\)\n- UIをApple風モダンデザインに刷新 \\(グラスモーフィズム、ダークモード対応\\)\n- 不要ファイルのクリーンアップ \\(output_*.ts, test_*.ts, バックアップファイル削除\\)\n- npm依存関係の再インストール \\(@types/supertest追加\\)\n- CLAUDE.mdガイドライン完全準拠\n\n技術的改善:\n- src/core/c3l.ts: 型安全性向上 \\(C3LContext明示的型指定\\)\n- src/core/brain.ts: 未使用変数削除\n- src/core/kernel.ts: 未使用パラメータ修正\n- src/utils/weather.ts: 型アサーション追加\n- src/frontend/index.html: ハッカー風 → Apple風デザイン\n\n品質保証:\n- npm test: 4つのテストがパス\n- npm run typecheck: 型エラーなし\n- CLAUDE.mdガイドライン準拠確認\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(npm run dashboard:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill /PID 16052 /F)",
+      "Bash(powershell -Command \"Stop-Process -Id 16052 -Force\")",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(cmd.exe /c taskkill /F /PID 15244)",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 15244 -Force\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 6848 -Force\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 16180 -Force\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 16660 -Force\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 15164 -Force\")",
+      "Bash(timeout 2 cat:*)",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 19868 -Force\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 15112 -Force\")",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(powershell.exe:*)",
+      "Bash(Start-Sleep -Seconds 1)",
+      "Bash(git commit:*)"
     ]
   }
 }

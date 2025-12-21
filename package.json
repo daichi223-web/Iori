@@ -57,6 +57,7 @@
     "remark-gfm": "^4.0.0",
     "remark-parse": "^11.0.0",
     "simple-git": "^3.22.0",
+    "systeminformation": "^5.27.14",
     "unified": "^11.0.5",
     "ws": "^8.16.0",
     "zod": "^3.22.4"

@@ -1,0 +1,19 @@
+{
+  "id": "mock-001",
+  "label": "WU-04/WU-05 Complete",
+  "commit": "ea20784",
+  "dod": {
+    "overall": "28%",
+    "spec": "75%",
+    "functionality": "40%",
+    "proof": "0%",
+    "safety": "0%",
+    "release": "0%"
+  },
+  "newFeatures": [
+    "Mock Snapshot API",
+    "DoD Progress API"
+  ],
+  "knownIssues": [],
+  "createdAt": "2025-12-21T07:16:31.953Z"
+}
