@@ -121,7 +121,7 @@ describe('DoD Parser', () => {
       const progress: DoDProgress = {
         overall: { percentage: 50, completed: 10, total: 20 },
         sections: {
-          'Functionality': { percentage: 40, completed: 2, total: 5, items: [] }
+          'Functionality': { name: 'Functionality', percentage: 40, completed: 2, total: 5, items: [] }
         },
         nextActions: [],
         lastUpdated: new Date().toISOString()
@@ -135,8 +135,8 @@ describe('DoD Parser', () => {
       const progress: DoDProgress = {
         overall: { percentage: 80, completed: 16, total: 20 },
         sections: {
-          'Functionality': { percentage: 90, completed: 4, total: 5, items: [] },
-          'Proof': { percentage: 40, completed: 2, total: 5, items: [] }
+          'Functionality': { name: 'Functionality', percentage: 90, completed: 4, total: 5, items: [] },
+          'Proof': { name: 'Proof', percentage: 40, completed: 2, total: 5, items: [] }
         },
         nextActions: [],
         lastUpdated: new Date().toISOString()
@@ -150,9 +150,9 @@ describe('DoD Parser', () => {
       const progress: DoDProgress = {
         overall: { percentage: 90, completed: 18, total: 20 },
         sections: {
-          'Functionality': { percentage: 100, completed: 5, total: 5, items: [] },
-          'Proof': { percentage: 100, completed: 5, total: 5, items: [] },
-          'Safety': { percentage: 0, completed: 0, total: 3, items: [] }
+          'Functionality': { name: 'Functionality', percentage: 100, completed: 5, total: 5, items: [] },
+          'Proof': { name: 'Proof', percentage: 100, completed: 5, total: 5, items: [] },
+          'Safety': { name: 'Safety', percentage: 0, completed: 0, total: 3, items: [] }
         },
         nextActions: [],
         lastUpdated: new Date().toISOString()
@@ -166,10 +166,10 @@ describe('DoD Parser', () => {
       const progress: DoDProgress = {
         overall: { percentage: 95, completed: 19, total: 20 },
         sections: {
-          'Functionality': { percentage: 100, completed: 5, total: 5, items: [] },
-          'Proof': { percentage: 100, completed: 5, total: 5, items: [] },
-          'Safety': { percentage: 100, completed: 3, total: 3, items: [] },
-          'Release': { percentage: 0, completed: 0, total: 4, items: [] }
+          'Functionality': { name: 'Functionality', percentage: 100, completed: 5, total: 5, items: [] },
+          'Proof': { name: 'Proof', percentage: 100, completed: 5, total: 5, items: [] },
+          'Safety': { name: 'Safety', percentage: 100, completed: 3, total: 3, items: [] },
+          'Release': { name: 'Release', percentage: 0, completed: 0, total: 4, items: [] }
         },
         nextActions: [],
         lastUpdated: new Date().toISOString()
@@ -183,10 +183,10 @@ describe('DoD Parser', () => {
       const progress: DoDProgress = {
         overall: { percentage: 100, completed: 20, total: 20 },
         sections: {
-          'Functionality': { percentage: 100, completed: 5, total: 5, items: [] },
-          'Proof (Required)': { percentage: 100, completed: 5, total: 5, items: [] },
-          'Safety': { percentage: 100, completed: 3, total: 3, items: [] },
-          'Release': { percentage: 100, completed: 4, total: 4, items: [] }
+          'Functionality': { name: 'Functionality', percentage: 100, completed: 5, total: 5, items: [] },
+          'Proof (Required)': { name: 'Proof (Required)', percentage: 100, completed: 5, total: 5, items: [] },
+          'Safety': { name: 'Safety', percentage: 100, completed: 3, total: 3, items: [] },
+          'Release': { name: 'Release', percentage: 100, completed: 4, total: 4, items: [] }
         },
         nextActions: [],
         lastUpdated: new Date().toISOString()

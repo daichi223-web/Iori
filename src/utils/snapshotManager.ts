@@ -11,6 +11,9 @@ import { parseDoDFile, type DoDProgress } from './dodParser.js';
 
 const execPromise = promisify(exec);
 
+// Re-export DoDProgress for tests
+export type { DoDProgress };
+
 export interface SnapshotMeta {
   id: string;
   label: string;

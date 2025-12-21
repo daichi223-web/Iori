@@ -63,7 +63,8 @@
       "Bash(git rev-parse:*)",
       "Bash(xargs:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm test:*)"
     ]
   }
 }

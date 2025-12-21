@@ -224,9 +224,23 @@ Phase 3: Implementation
 
 // API: Cloud Actions (GitHub, Vercel, Firebase)
 // @security Action-based allowlist - NO arbitrary commands
+// @safety Destructive operations require user confirmation
+// @rateLimit 10 requests per minute
 app.post("/api/cloud/action", async (req, res) => {
   try {
-    const { service, action } = req.body;
+    // Rate limiting check
+    const { checkRateLimit, RATE_LIMITS } = await import("../core/rateLimit.js");
+    const rateLimitResult = checkRateLimit('cloud:/api/cloud/action', RATE_LIMITS.cloud);
+
+    if (!rateLimitResult.allowed) {
+      res.status(429).json({
+        error: rateLimitResult.message,
+        retryAfter: rateLimitResult.resetAt ? Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000) : 60
+      });
+      return;
+    }
+
+    const { service, action, confirmationId } = req.body;
 
     if (!service || !action) {
       res.status(400).json({
@@ -238,6 +252,7 @@ app.post("/api/cloud/action", async (req, res) => {
 
     // Dynamic import for ES module
     const { buildCommand, getGitSyncCommands, isActionAllowed } = await import("../core/cloudActions.js");
+    const { validateAction, confirmOperation } = await import("../core/safety.js");
 
     // Validate action is in allowlist
     if (!isActionAllowed(service, action)) {
@@ -253,6 +268,50 @@ app.post("/api/cloud/action", async (req, res) => {
         }
       });
       return;
+    }
+
+    // Safety validation: Check if action needs confirmation
+    const cloudAction: any = { service, action };
+
+    // If confirmationId is provided, verify it
+    if (confirmationId) {
+      const confirmed = confirmOperation(confirmationId);
+      if (!confirmed) {
+        res.status(400).json({
+          error: "Invalid or expired confirmation ID",
+          confirmationId
+        });
+        return;
+      }
+      // Confirmation verified, proceed with execution
+    } else {
+      // No confirmation ID, validate if one is needed
+      const validation = validateAction(cloudAction);
+
+      if (!validation.allowed) {
+        // Action blocked or needs confirmation
+        if (validation.pendingId) {
+          // Needs user confirmation
+          res.status(202).json({
+            error: validation.reason,
+            requiresConfirmation: true,
+            pendingId: validation.pendingId,
+            service,
+            action,
+            message: "This operation requires user confirmation. Please approve via /api/safety/confirm/:id"
+          });
+        } else {
+          // Blocked by Safe Mode
+          res.status(403).json({
+            error: validation.reason,
+            service,
+            action,
+            blockedBy: "SafeMode"
+          });
+        }
+        return;
+      }
+      // Action is safe, proceed
     }
 
     // Special handling for git syncMain (sequential commands)
@@ -290,7 +349,6 @@ app.post("/api/cloud/action", async (req, res) => {
     }
 
     // Build command from action
-    const cloudAction: any = { service, action };
     const cmdSpec = buildCommand(cloudAction);
 
     // Special handling for login commands (interactive browser-based auth)
@@ -496,10 +554,146 @@ app.get("/api/snapshot/:id", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// ===============================================
+// SAFETY SYSTEM API ENDPOINTS
+// ===============================================
+
+// API: Get all pending operations
+app.get("/api/safety/pending", async (_req, res) => {
+  try {
+    const { getAllPendingOperations } = await import("../core/safety.js");
+    const pending = getAllPendingOperations();
+
+    res.json({
+      success: true,
+      pending,
+      count: pending.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// API: Confirm a pending operation
+// @rateLimit 20 requests per minute
+app.post("/api/safety/confirm/:id", async (req, res) => {
+  try {
+    // Rate limiting check
+    const { checkRateLimit, RATE_LIMITS } = await import("../core/rateLimit.js");
+    const rateLimitResult = checkRateLimit('safety:/api/safety/confirm', RATE_LIMITS.safety);
+
+    if (!rateLimitResult.allowed) {
+      res.status(429).json({
+        success: false,
+        error: rateLimitResult.message,
+        retryAfter: rateLimitResult.resetAt ? Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000) : 60
+      });
+      return;
+    }
+
+    const { confirmOperation } = await import("../core/safety.js");
+    const operation = confirmOperation(req.params.id);
+
+    if (!operation) {
+      res.status(404).json({
+        success: false,
+        error: "Operation not found or expired"
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      operation,
+      message: "Operation confirmed. You may now execute it."
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// API: Cancel a pending operation
+app.post("/api/safety/cancel/:id", async (req, res) => {
+  try {
+    const { cancelOperation } = await import("../core/safety.js");
+    const cancelled = cancelOperation(req.params.id);
+
+    if (!cancelled) {
+      res.status(404).json({
+        success: false,
+        error: "Operation not found"
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: "Operation cancelled"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// API: Get Safe Mode configuration
+app.get("/api/safety/mode", async (_req, res) => {
+  try {
+    const { getSafeModeConfig } = await import("../core/safety.js");
+    const config = getSafeModeConfig();
+
+    res.json({
+      success: true,
+      config
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// API: Update Safe Mode configuration
+app.put("/api/safety/mode", async (req, res) => {
+  try {
+    const { setSafeModeConfig } = await import("../core/safety.js");
+    const config = setSafeModeConfig(req.body);
+
+    res.json({
+      success: true,
+      config,
+      message: "Safe Mode configuration updated"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+app.listen(PORT, async () => {
   console.log(`\n🌐 Iori Dashboard Server`);
   console.log(`   Running on: http://localhost:${PORT}`);
   console.log(`   Status: Online\n`);
+
+  // Cleanup expired rate limit entries every 5 minutes
+  const { cleanupExpiredEntries } = await import("../core/rateLimit.js");
+  setInterval(() => {
+    const cleaned = cleanupExpiredEntries();
+    if (cleaned > 0) {
+      console.log(`🧹 Cleaned ${cleaned} expired rate limit entries`);
+    }
+  }, 5 * 60 * 1000); // 5 minutes
 });
 
 export { app };
