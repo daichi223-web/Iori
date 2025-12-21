@@ -120,6 +120,11 @@ app.get("/api/status", async (_req, res) => {
       status: "online",
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
+      currentState: {
+        mode: 'Idle' as 'Idle' | 'Planning' | 'Building' | 'Verifying' | 'Snapshotting' | 'Blocked' | 'Error',
+        phase: 'Ready',
+        target: 'Waiting for input'
+      },
       cpu: {
         load: Math.round(os.loadavg()[0] * 10), // 1-minute load average * 10 for percentage-like value
         cores: os.cpus().length

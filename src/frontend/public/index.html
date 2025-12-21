@@ -271,6 +271,15 @@
           </div>
         </div>
 
+        <!-- Status Banner (Now) -->
+        <div class="absolute top-14 md:top-20 left-1/2 -translate-x-1/2 z-50">
+          <p class="font-mono-data text-xs md:text-sm text-cyan-300 glow-cyan tracking-wide" id="status-banner">
+            <span id="status-mode">⚪ Idle</span> ·
+            <span id="status-phase">Ready</span> ·
+            <span id="status-target">Waiting for input</span>
+          </p>
+        </div>
+
         <!-- Core Center -->
         <div class="absolute inset-24 md:inset-36 lg:inset-44 bg-slate-900 rounded-full border-4 border-slate-700 flex items-center justify-center overflow-hidden z-10 glow-blue">
 
@@ -280,8 +289,19 @@
           <div id="segment-proof" class="core-segment segment-left bg-slate-800/80"></div>
 
           <div class="absolute z-20 text-center">
-            <p class="font-sci-fi text-xs md:text-sm text-slate-400 tracking-widest mb-1">CORE</p>
-            <p class="font-mono-data text-lg md:text-2xl font-bold text-white glow-blue" id="core-status">STANDBY</p>
+            <p class="font-mono-data text-3xl md:text-4xl font-bold text-white glow-blue" id="core-percent">0%</p>
+            <p class="font-sci-fi text-xs md:text-sm text-slate-400 tracking-widest mt-1" id="core-status">LOADING</p>
+          </div>
+        </div>
+
+        <!-- Next Action Panel (C) -->
+        <div class="absolute bottom-12 md:bottom-16 left-1/2 -translate-x-1/2 z-50 w-64 md:w-80">
+          <div class="hud-panel bg-slate-800/80 border border-violet-500/40 rounded-lg p-3">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-violet-500 rounded-full glow-violet"></div>
+              <h3 class="font-sci-fi text-xs text-violet-300 tracking-widest">NEXT ACTION</h3>
+            </div>
+            <p class="font-mono-data text-xs text-white" id="next-action-text">Loading...</p>
           </div>
         </div>
 
@@ -359,14 +379,33 @@
         if (status.status === 'online') {
           if (elements.cpuHud) elements.cpuHud.textContent = `${status.cpu?.load || 0}%`;
           if (elements.memHud) elements.memHud.textContent = `${Math.round((status.memory?.active || 0) / 1024 / 1024)}MB`;
-          if (elements.coreStatus) elements.coreStatus.textContent = 'ACTIVE';
+          // Core status will be updated from /api/progress
+
+          // Update Status Banner (Now)
+          const modeIcons = {
+            'Idle': '⚪',
+            'Planning': '🟡',
+            'Building': '🟢',
+            'Verifying': '🔵',
+            'Snapshotting': '🧊',
+            'Blocked': '⏸',
+            'Error': '🔴'
+          };
+          const currentState = status.currentState || { mode: 'Idle', phase: 'Ready', target: 'Waiting for input' };
+          const modeIcon = modeIcons[currentState.mode as keyof typeof modeIcons] || '⚪';
+          const statusMode = document.getElementById('status-mode');
+          const statusPhase = document.getElementById('status-phase');
+          const statusTarget = document.getElementById('status-target');
+          if (statusMode) statusMode.textContent = `${modeIcon} ${currentState.mode}`;
+          if (statusPhase) statusPhase.textContent = currentState.phase;
+          if (statusTarget) statusTarget.textContent = currentState.target;
         }
 
         const logsRes = await fetch('/api/logs');
         const logs = await logsRes.json();
 
         if (logs.lines && logs.lines.length > 0) {
-          const logLines = logs.lines.slice(-40).map(line => {
+          const logLines = logs.lines.slice(-5).map(line => {
             let escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             if (escaped.includes('Autonomous mode started') || escaped.includes('Executing C3L')) {
@@ -447,6 +486,20 @@
             if (dodOverallPercent) dodOverallPercent.textContent = `${overallPercent}%`;
             if (dodOverallBar) dodOverallBar.style.width = `${overallPercent}%`;
 
+            // Update Core UI (円グラフの中央)
+            const corePercent = document.getElementById('core-percent');
+            const coreStatus = document.getElementById('core-status');
+            if (corePercent) corePercent.textContent = `${overallPercent}%`;
+            if (coreStatus) {
+              if (overallPercent === 100) {
+                coreStatus.textContent = 'DONE';
+              } else if (overallPercent > 0) {
+                coreStatus.textContent = 'IN PROGRESS';
+              } else {
+                coreStatus.textContent = 'PENDING';
+              }
+            }
+
             // Update section progress
             if (progress.sections) {
               const specPercent = progress.sections['Spec']?.percentage || 0;
@@ -466,6 +519,18 @@
             const nextAction = progress.nextActions?.[0] || progress.recommendedWorkUnit || 'All tasks completed!';
             const dodNextAction = document.getElementById('dod-next-action');
             if (dodNextAction) dodNextAction.textContent = nextAction;
+
+            // Update Next Action Panel (C)
+            const nextActionText = document.getElementById('next-action-text');
+            if (nextActionText) {
+              if (progress.nextActions && progress.nextActions.length > 0) {
+                nextActionText.textContent = progress.nextActions.slice(0, 2).join(' • ');
+              } else if (progress.recommendedWorkUnit) {
+                nextActionText.textContent = progress.recommendedWorkUnit;
+              } else {
+                nextActionText.textContent = '✅ All tasks completed!';
+              }
+            }
           }
         } catch (e) {
           console.error('Failed to load DoD progress:', e);
