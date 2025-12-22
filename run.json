@@ -1,0 +1,89 @@
+{
+  "$schema": "./agent-dag-schema.json",
+  "version": "1.0.0",
+  "name": "Iori Agent Framework - Full Development Pipeline",
+  "description": "Complete DAG for autonomous development: Spec → UI → Code → Test → Proof → Release",
+
+  "agents": [
+    {
+      "id": "spec",
+      "enabled": true,
+      "config": {
+        "model": "gemini",
+        "temperature": 0.7
+      }
+    },
+    {
+      "id": "ui",
+      "enabled": true,
+      "config": {
+        "model": "claude",
+        "temperature": 0.6
+      }
+    },
+    {
+      "id": "code",
+      "enabled": true,
+      "config": {
+        "model": "claude",
+        "temperature": 0.4
+      }
+    },
+    {
+      "id": "test",
+      "enabled": true,
+      "config": {
+        "model": "claude",
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "proof",
+      "enabled": true,
+      "config": {
+        "model": "gemini",
+        "temperature": 0.2
+      }
+    },
+    {
+      "id": "release",
+      "enabled": true,
+      "config": {
+        "model": "gemini",
+        "temperature": 0.1
+      }
+    }
+  ],
+
+  "entryPoints": {
+    "full": "release",
+    "spec-only": "spec",
+    "code-gen": "code",
+    "testing": "test",
+    "verification": "proof"
+  },
+
+  "defaultEntry": "release",
+  "defaultConcurrency": 3,
+
+  "globalConfig": {
+    "stopOnError": false,
+    "timeoutMs": 1800000,
+    "retryFailed": true,
+    "saveArtifacts": true,
+    "outputDir": "./iori-generated"
+  },
+
+  "hooks": {
+    "beforeAll": "echo '🚀 Iori Agent Pipeline Starting...'",
+    "afterAll": "echo '✅ Iori Agent Pipeline Complete!'",
+    "onError": "echo '❌ Agent failed: ${agentId}'"
+  },
+
+  "metadata": {
+    "author": "Iori v3.0",
+    "created": "2025-12-21",
+    "framework": "MetaPilot",
+    "tags": ["autonomous", "multi-agent", "dag", "llm"]
+  }
+}

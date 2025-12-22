@@ -64,7 +64,13 @@
       "Bash(xargs:*)",
       "Bash(npm run build:*)",
       "Bash(npm run lint)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vercel:*)",
+      "Bash(explorer.exe C:\\\\Users\\\\a713678\\\\Documents\\\\ai-agent\\\\space-invaders-iori)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(pkill:*)"
     ]
   }
 }
