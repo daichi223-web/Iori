@@ -1,1 +1,172 @@
-# Iori - TDD TypeScript Project\n\nテスト駆動開発 (TDD) で構築された TypeScript プロジェクトです。\n\n## セットアップ\n\n```bash\nnpm install\n```\n\n## 開発\n\n```bash\n# テスト実行\nnpm test\n\n# テストを watch モードで実行\nnpm run test:watch\n\n# 開発サーバー起動\nnpm run dev\n\n# ビルド\nnpm run build\n\n# 本番実行\nnpm start\n```\n\n## プロジェクト構造\n\n```\nsrc/\n├── __tests__/          # テストファイル\n├── api/                # API エンドポイント\n├── services/           # ビジネスロジック\n├── models/             # データモデル\n└── utils/              # ユーティリティ関数\n```\n\n## 3将軍システム\n\nこのプロジェクトは3つの役割を協調させてタスクを進めます：\n\n1. **Gemini**: 分析と計画の作成\n2. **Claude**: 設計とコード生成\n3. **Codex**: 実装の最終化（ファイルパスと内容の確定・保存）\n\n## TDD フロー\n\nこのプロジェクトは **テスト駆動開発 (TDD)** を採用しています：\n\n1. **RED**: テストを先に書く\n2. **GREEN**: テストを通す最小限の実装\n3. **REFACTOR**: コードを改善\n\n詳細は `CLAUDE.md` を参照してください。\n\n## ドキュメント\n\n- 📘 [API リファレンス](./docs/api/reference.md) - 詳細な API 使用ガイド\n- 📋 [OpenAPI 仕様書](./docs/api/openapi.yaml) - 機械可読な API 定義\n- 🏗️ [システム設計](./docs/architecture/system-design.md) - アーキテクチャドキュメント\n- 📚 [ドキュメント目次](./docs/README.md) - すべてのドキュメント一覧\n\n## API エンドポイント\n\n### GET /api/hello\nHello World エンドポイント\n\n**レスポンス:**\n```json\n{\n  "message": "Hello, World!",\n  "timestamp": "2024-01-01T00:00:00.000Z"\n}\n```\n\n## 開発ルール\n\n- TypeScript 必須\n- カバレッジ 80% 以上\n- 1ファイル 500行以内\n- テストなしのコードは禁止\n\n詳細は `CLAUDE.md` を参照してください。
+# Iori v4.0 - Autonomous AI Development OS
+
+Electron ベースの並列自律開発システム。Claude, Gemini, Codex を統合し、Trinity Meeting による協調開発を実現します。
+
+## Features
+
+- **Trinity Meeting**: Claude, Gemini, Codex の3つのAIを並列実行
+- **VSCode-style Architecture**: Electron + IPC による堅牢なプロセス分離
+- **DoD Tracking**: Definition of Done ベースの進捗管理
+- **Git Integration**: GitHub CLI (gh) との連携
+- **Real-time Logging**: セッションログの永続化と検索
+
+## Requirements
+
+- Node.js 18+
+- npm 9+
+- Claude CLI (`npm install -g @anthropic-ai/claude-code`)
+- Gemini CLI (`npm install -g @google/gemini-cli`)
+- Codex CLI (`npm install -g @openai/codex`)
+
+## Installation
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/iori.git
+cd iori
+
+# Install dependencies
+npm install
+
+# Build
+npm run build
+npm run build:electron
+```
+
+## Usage
+
+### Electron App (推奨)
+
+```bash
+# Production
+npm run electron
+
+# Development (with hot reload)
+npm run electron:dev
+```
+
+### CLI Runner
+
+```bash
+# Start autonomous development
+npm run runner:start
+
+# Dashboard
+npm run dashboard
+```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Iori v4.0                      │
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │           Electron Main Process          │   │
+│  │  ┌───────────────────────────────────┐  │   │
+│  │  │         IPC Handlers               │  │   │
+│  │  │  • cli:*   (CLIBridge)            │  │   │
+│  │  │  • state:* (StateManager)         │  │   │
+│  │  │  • log:*   (LogManager)           │  │   │
+│  │  │  • dod:*   (DoDManager)           │  │   │
+│  │  │  • git:*   (GitManager)           │  │   │
+│  │  │  • worker:*(WorkerPool)           │  │   │
+│  │  └───────────────────────────────────┘  │   │
+│  └─────────────────────────────────────────┘   │
+│                      │                          │
+│               contextBridge                     │
+│                      │                          │
+│  ┌─────────────────────────────────────────┐   │
+│  │           Renderer Process              │   │
+│  │           (Dashboard UI)                 │   │
+│  └─────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
+```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run electron` | Start Electron app |
+| `npm run electron:dev` | Development mode |
+| `npm run build` | Build TypeScript |
+| `npm run build:electron` | Build Electron modules |
+| `npm test` | Run tests (Vitest) |
+| `npm run typecheck` | Type checking |
+| `npm run dashboard` | Start web dashboard |
+
+## Project Structure
+
+```
+iori/
+├── electron/           # Electron main process
+│   ├── main.ts         # Entry point
+│   ├── preload.ts      # contextBridge API
+│   ├── cli-bridge.ts   # AI CLI communication
+│   ├── state-manager.ts# Project state
+│   ├── log-manager.ts  # Logging system
+│   ├── dod-manager.ts  # DoD tracking
+│   ├── git-manager.ts  # Git operations
+│   └── worker-pool.ts  # Parallel workers
+├── src/
+│   ├── core/           # Kernel, Brain, Shell
+│   ├── frontend/       # Dashboard server
+│   ├── cli/            # CLI runner
+│   └── __tests__/      # Test files
+├── .iori/              # Runtime data
+│   ├── project.json    # Project state
+│   └── logs/           # Session logs
+├── DOD.md              # Definition of Done
+├── CLAUDE.md           # Development guidelines
+└── REQUIREMENTS_ELECTRON.md  # v4.0 specifications
+```
+
+## Trinity Meeting
+
+3つのAIを並列実行して最適な結果を得る機能です。
+
+```typescript
+// Example usage via IPC
+const result = await window.iori.worker.trinity('Implement user auth');
+console.log(result.workers.claude.output);
+console.log(result.workers.gemini.output);
+console.log(result.workers.codex.output);
+```
+
+## Development
+
+### TDD Workflow
+
+1. **RED**: Write failing test
+2. **GREEN**: Implement minimum code
+3. **REFACTOR**: Clean up
+
+```bash
+# Run tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Type check
+npm run typecheck
+```
+
+### Sub-Agents
+
+| Agent | Role |
+|-------|------|
+| @kernel | Logic & Brain |
+| @shell | System & IO |
+| @ui | Frontend & Design |
+| @qa | Quality Assurance |
+| @strategist | Product Manager |
+| @sentinel | Security |
+| @ghost | Refactor & Optimize |
+| @scribe | Documentation |
+
+See `CLAUDE.md` for detailed guidelines.
+
+## License
+
+MIT

@@ -1,8 +1,10 @@
 // src/core/kernel.ts
 // Iori Kernel v3.0 - Unified AI Development System
 import { C3LEngine, C3LContext } from "./c3l.js";
-import { think, BrainProvider } from "./brain.js";
+import { think, BrainProvider, BrainConfig } from "./brain.js";
+export { thinkParallel, thinkRace, clearBrainCache } from "./brain.js";
 import { ShellController } from "./shell.js";
+import { MemoryStore } from "./memory.js";
 import fs from "fs/promises";
 import path from "path";
 import chalk from "chalk";
@@ -14,7 +16,9 @@ export interface KernelConfig {
   todoFile?: string;
   logFile?: string;
   defaultBrain?: BrainProvider;
-  autoExecute?: boolean; // Shell Controllerで自動実行するか
+  autoExecute?: boolean;
+  memoryEnabled?: boolean;
+  brainConfig?: BrainConfig;
 }
 
 export interface TaskResult {
@@ -22,25 +26,30 @@ export interface TaskResult {
   output?: string;
   error?: string;
   filePath?: string;
+  memoryId?: string;
 }
 
 /**
  * Iori Kernel v3.0
- * C3L Kernel + Brain + Shell Controller の統合システム
+ * C3L Kernel + Brain + Shell Controller + Long-Term Memory の統合システム
  */
 export class IoriKernel {
   private c3l: C3LEngine;
   private shell: ShellController;
+  private memory: MemoryStore;
   private config: Required<KernelConfig>;
 
   constructor(config: KernelConfig = {}) {
     this.c3l = new C3LEngine();
     this.shell = new ShellController();
+    this.memory = new MemoryStore();
     this.config = {
       todoFile: config.todoFile || "TODO.md",
       logFile: config.logFile || "iori_system.log",
       defaultBrain: config.defaultBrain || "CLAUDE",
-      autoExecute: config.autoExecute !== undefined ? config.autoExecute : false
+      autoExecute: config.autoExecute !== undefined ? config.autoExecute : false,
+      memoryEnabled: config.memoryEnabled !== undefined ? config.memoryEnabled : true,
+      brainConfig: config.brainConfig || { timeout: 120000, maxRetries: 2, cacheEnabled: true }
     };
   }
 
@@ -51,6 +60,82 @@ export class IoriKernel {
     const timestamp = new Date().toISOString();
     const logLine = `[${timestamp}] [${level}] ${message}\n`;
     await fs.appendFile(this.config.logFile, logLine);
+  }
+
+  /**
+   * 過去の類似経験を検索してプロンプトに追加するコンテキストを生成
+   */
+  private async buildMemoryContext(taskDescription: string): Promise<string> {
+    if (!this.config.memoryEnabled) {
+      return "";
+    }
+
+    try {
+      const relevantMemories = await this.memory.recall(taskDescription, {
+        limit: 3,
+        types: ['success', 'solution', 'learning']
+      });
+
+      const recentErrors = await this.memory.getRecentErrors({ limit: 2, daysBack: 7 });
+
+      if (relevantMemories.length === 0 && recentErrors.length === 0) {
+        return "";
+      }
+
+      const lines: string[] = ["\n\n# Past Experiences (Memory Context)"];
+
+      if (relevantMemories.length > 0) {
+        lines.push("\n## Relevant Past Successes:");
+        for (const result of relevantMemories) {
+          const entry = result.entry;
+          lines.push(`- [${entry.type}] ${entry.content.substring(0, 200)}...`);
+        }
+      }
+
+      if (recentErrors.length > 0) {
+        lines.push("\n## Recent Errors to Avoid:");
+        for (const entry of recentErrors) {
+          lines.push(`- ${entry.content.substring(0, 150)}...`);
+        }
+      }
+
+      return lines.join("\n");
+    } catch {
+      return "";
+    }
+  }
+
+  /**
+   * タスク実行結果をメモリに保存
+   */
+  private async saveTaskMemory(
+    taskDescription: string,
+    result: TaskResult,
+    directive: string,
+    layer: string
+  ): Promise<string | undefined> {
+    if (!this.config.memoryEnabled) {
+      return undefined;
+    }
+
+    try {
+      const memoryEntry = await this.memory.save({
+        type: result.success ? 'success' : 'error',
+        content: result.success
+          ? `Task: ${taskDescription}\nDirective: ${directive} ${layer}\nOutput: ${result.output?.substring(0, 500) || ''}`
+          : `Task: ${taskDescription}\nDirective: ${directive} ${layer}\nError: ${result.error || 'Unknown error'}`,
+        tags: [directive, layer, result.success ? 'completed' : 'failed'],
+        metadata: {
+          source: 'kernel',
+          context: { filePath: result.filePath, directive, layer }
+        }
+      });
+
+      console.log(chalk.gray(`  📝 Memory saved: ${memoryEntry.id}`));
+      return memoryEntry.id;
+    } catch {
+      return undefined;
+    }
   }
 
   /**
@@ -67,18 +152,26 @@ export class IoriKernel {
     brain?: BrainProvider
   ): Promise<TaskResult> {
     const useBrain = brain || this.config.defaultBrain;
+    const taskDescription = context.input_content || `${directive} ${layer}`;
 
     try {
       console.log(chalk.cyan(`\n🎯 Executing C3L: ${directive} ${layer}`));
       await this.log(`Executing C3L: ${directive} ${layer}`);
 
-      // Phase 1: C3L Kernelでプロンプト生成
-      const prompt = await this.c3l.transpile(directive, layer, context);
+      // Phase 0: 過去の経験をリコール
+      const memoryContext = await this.buildMemoryContext(taskDescription);
+      if (memoryContext) {
+        console.log(chalk.gray(`  🧠 Memory context loaded`));
+      }
+
+      // Phase 1: C3L Kernelでプロンプト生成（メモリコンテキスト付き）
+      const basePrompt = await this.c3l.transpile(directive, layer, context);
+      const prompt = basePrompt + memoryContext;
       console.log(chalk.gray(`  📝 Prompt generated (${prompt.length} chars)`));
 
-      // Phase 2: Brainで思考・生成
+      // Phase 2: Brainで思考・生成（設定付き）
       console.log(chalk.magenta(`  🧠 ${useBrain} is processing...`));
-      const aiOutput = await think(prompt, "", useBrain);
+      const aiOutput = await think(prompt, "", useBrain, this.config.brainConfig);
 
       // Phase 3: コード抽出
       let { filePath, content } = this.parseCodeBlock(aiOutput);
@@ -101,22 +194,34 @@ export class IoriKernel {
           await this.autoExecuteTask(filePath, layer);
         }
 
-        return {
+        const result: TaskResult = {
           success: true,
           output: aiOutput,
           filePath
         };
+
+        // Phase 4: 成功をメモリに保存
+        result.memoryId = await this.saveTaskMemory(taskDescription, result, directive, layer);
+
+        return result;
       } else {
         throw new Error("Could not extract content from AI output");
       }
 
-    } catch (error: any) {
-      console.error(chalk.red(`  ❌ C3L Execution Failed: ${error.message}`));
-      await this.log(`C3L Execution Failed: ${error.message}`, "ERROR");
-      return {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(chalk.red(`  ❌ C3L Execution Failed: ${errorMessage}`));
+      await this.log(`C3L Execution Failed: ${errorMessage}`, "ERROR");
+
+      const result: TaskResult = {
         success: false,
-        error: error.message
+        error: errorMessage
       };
+
+      // 失敗もメモリに保存
+      result.memoryId = await this.saveTaskMemory(taskDescription, result, directive, layer);
+
+      return result;
     }
   }
 

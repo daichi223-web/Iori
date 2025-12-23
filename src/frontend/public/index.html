@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iori v3.0 - Dashboard</title>
     <style>
-        /* Apple Human Interface Guidelines準拠 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Apple Human Interface Guidelines */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
@@ -20,18 +16,309 @@
             padding: 20px;
         }
 
-        /* ヘッダー: すりガラス効果 */
         header {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-radius: 16px;
-            padding: 20px 30px;
-            margin-bottom: 24px;
+            padding: 16px 24px;
+            margin-bottom: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .control-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .iori-btn {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            border: 2px solid #30363d;
+        }
+
+        .iori-btn:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .iori-btn.active {
+            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+            border-color: #3fb950;
+            box-shadow: 0 0 20px rgba(63, 185, 80, 0.4);
+        }
+
+        .trinity-btn {
+            background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
+            color: #fff;
+            border: 2px solid #7C7AFF;
+        }
+
+        .trinity-btn:hover {
+            border-color: #BF5AF2;
+            box-shadow: 0 0 20px rgba(175, 82, 222, 0.4);
+        }
+
+        .trinity-btn.active {
+            background: linear-gradient(135deg, #FF9500 0%, #FF2D55 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .btn-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-indicator.off {
+            background: #484f58;
+        }
+
+        .btn-indicator.on {
+            background: #3fb950;
+            box-shadow: 0 0 10px rgba(63, 185, 80, 0.8);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            gap: 24px;
+        }
+
+        .panel-section {
+            flex: 1;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #8E8E93;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        /* AI Controls */
+        .ai-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .ai-card {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 14px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .ai-card.connected {
+            border-color: #3fb950;
+            background: rgba(63, 185, 80, 0.05);
+        }
+
+        .ai-card.active {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .ai-icon { font-size: 20px; }
+
+        .ai-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1D1D1F;
+            flex: 1;
+        }
+
+        .ai-status {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .ai-status.offline {
+            background: rgba(142, 142, 147, 0.2);
+            color: #8E8E93;
+        }
+
+        .ai-status.online {
+            background: rgba(63, 185, 80, 0.2);
+            color: #238636;
+        }
+
+        .ai-status.busy {
+            background: rgba(255, 149, 0, 0.2);
+            color: #D97706;
+        }
+
+        .ai-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .ai-btn {
+            flex: 1;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ai-btn.connect {
+            background: #e8e8ea;
+            color: #1D1D1F;
+        }
+
+        .ai-btn.connect:hover {
+            background: #007AFF;
+            color: white;
+        }
+
+        .ai-btn.use {
+            background: #007AFF;
+            color: white;
+        }
+
+        .ai-btn.use:hover {
+            background: #0056b3;
+        }
+
+        .ai-btn.login {
+            background: #FF9500;
+            color: white;
+        }
+
+        .ai-btn.login:hover {
+            background: #E68600;
+        }
+
+        .ai-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Cloud Controls */
+        .cloud-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .cloud-card {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 14px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .cloud-card.connected {
+            border-color: #3fb950;
+            background: rgba(63, 185, 80, 0.05);
+        }
+
+        .cloud-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cloud-icon { font-size: 18px; }
+
+        .cloud-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1D1D1F;
+            flex: 1;
+        }
+
+        .cloud-status {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .cloud-status.offline {
+            background: rgba(142, 142, 147, 0.2);
+            color: #8E8E93;
+        }
+
+        .cloud-status.online {
+            background: rgba(63, 185, 80, 0.2);
+            color: #238636;
+        }
+
+        .cloud-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .cloud-btn {
+            flex: 1;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #e8e8ea;
+            color: #1D1D1F;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cloud-btn:hover {
+            background: #d1d1d6;
+        }
+
+        .cloud-btn.login {
+            background: #007AFF;
+            color: white;
+        }
+
+        .cloud-btn.login:hover {
+            background: #0056b3;
         }
 
         .logo {
@@ -69,19 +356,17 @@
             50% { opacity: 0.5; }
         }
 
-        /* メインコンテナ */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
         }
 
-        /* カードスタイル */
         .card {
             background: #FFFFFF;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 24px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -93,7 +378,7 @@
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             margin-bottom: 16px;
             color: #1D1D1F;
@@ -102,151 +387,1254 @@
             gap: 8px;
         }
 
-        .card-icon {
-            font-size: 24px;
+        .card-icon { font-size: 20px; }
+
+        /* Trinity Neural Network */
+        .neural-container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
         }
 
-        /* ログエリア */
-        .log-container {
-            grid-column: 1 / -1;
+        .network-card {
+            background: linear-gradient(135deg, #1D1D1F 0%, #2C2C2E 100%);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .network-card .card-title {
+            color: #FFFFFF;
+            margin-bottom: 24px;
+        }
+
+        .network-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* SVG Lines */
+        .network-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .line {
+            stroke: rgba(255, 255, 255, 0.15);
+            stroke-width: 2;
+            transition: all 0.5s ease;
+        }
+
+        .line.active {
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .line-claude { stroke: rgba(175, 82, 222, 0.3); }
+        .line-gemini { stroke: rgba(0, 122, 255, 0.3); }
+        .line-codex { stroke: rgba(52, 199, 89, 0.3); }
+
+        .line-claude.active { stroke: #AF52DE; }
+        .line-gemini.active { stroke: #007AFF; }
+        .line-codex.active { stroke: #34C759; }
+
+        /* Nodes */
+        .node {
+            position: absolute;
+            width: 72px;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .node-icon { font-size: 24px; margin-bottom: 4px; }
+        .node-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        /* Node Positions (Triangle) */
+        .node-kernel {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .node-claude {
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-color: #AF52DE;
+        }
+
+        .node-gemini {
+            bottom: 8%;
+            left: 15%;
+            border-color: #007AFF;
+        }
+
+        .node-codex {
+            bottom: 8%;
+            right: 15%;
+            border-color: #34C759;
+        }
+
+        /* Active Node State */
+        .node.active {
+            transform: scale(1.15);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .node-claude.active {
+            transform: translateX(-50%) scale(1.15);
+            border-color: #AF52DE;
+            box-shadow: 0 0 30px rgba(175, 82, 222, 0.6);
+        }
+
+        .node-gemini.active {
+            box-shadow: 0 0 30px rgba(0, 122, 255, 0.6);
+        }
+
+        .node-codex.active {
+            box-shadow: 0 0 30px rgba(52, 199, 89, 0.6);
+        }
+
+        .node.active .node-label {
+            color: #FFFFFF;
+        }
+
+        /* Pulse Ring */
+        .pulse-ring {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .node.active .pulse-ring {
+            animation: pulse-wave 1.5s ease-out infinite;
+        }
+
+        @keyframes pulse-wave {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        /* Neural Activity Display */
+        .neural-activity {
+            text-align: center;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .activity-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            color: #FFFFFF;
+            font-weight: 500;
+        }
+
+        /* Mission Status Panel */
+        .status-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .progress-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1D1D1F;
+        }
+
+        .progress-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #F5F5F7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007AFF 0%, #5856D6 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1D1D1F;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #8E8E93;
+            font-weight: 500;
+        }
+
+        /* Log Container */
+        .log-container { grid-column: 1 / -1; }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: #F5F5F7;
+            color: #1D1D1F;
+        }
+
+        .btn-secondary:hover { background: #E8E8EA; }
 
         .log-list {
             background: #F5F5F7;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 16px;
-            max-height: 400px;
+            max-height: 350px;
             overflow-y: auto;
         }
 
         .log-item {
             background: #FFFFFF;
-            border-radius: 6px;
+            border-radius: 8px;
             padding: 12px 16px;
             margin-bottom: 8px;
             font-size: 13px;
             font-family: "SF Mono", Monaco, "Courier New", monospace;
-            color: #3A3A3C;
-            border-left: 3px solid #007AFF;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             transition: background 0.2s ease;
         }
 
-        .log-item:hover {
-            background: #F9F9F9;
-        }
+        .log-item:hover { background: #F9F9F9; }
+        .log-item:last-child { margin-bottom: 0; }
 
-        .log-item:last-child {
-            margin-bottom: 0;
-        }
+        .log-item[data-provider="CLAUDE"] { border-left: 3px solid #AF52DE; }
+        .log-item[data-provider="GEMINI"] { border-left: 3px solid #007AFF; }
+        .log-item[data-provider="CODEX"] { border-left: 3px solid #34C759; }
+        .log-item[data-provider="SYSTEM"] { border-left: 3px solid #FF9500; }
 
-        .log-time {
-            color: #8E8E93;
-            font-size: 11px;
-            margin-right: 12px;
-        }
-
-        .log-message {
-            color: #1D1D1F;
-        }
-
-        /* メトリクスカード */
-        .metric {
+        .log-provider {
+            font-weight: 600;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            min-width: 56px;
             text-align: center;
-            padding: 16px;
-            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-            color: white;
-            border-radius: 12px;
-            margin-top: 12px;
         }
 
-        .metric-value {
-            font-size: 36px;
+        .provider-claude { background: rgba(175, 82, 222, 0.15); color: #AF52DE; }
+        .provider-gemini { background: rgba(0, 122, 255, 0.15); color: #007AFF; }
+        .provider-codex { background: rgba(52, 199, 89, 0.15); color: #34C759; }
+        .provider-system { background: rgba(255, 149, 0, 0.15); color: #FF9500; }
+
+        .log-level {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .level-info { background: #E8E8EA; color: #636366; }
+        .level-plan { background: rgba(50, 173, 230, 0.15); color: #32ADE6; }
+        .level-code { background: rgba(52, 199, 89, 0.15); color: #34C759; }
+        .level-test { background: rgba(255, 149, 0, 0.15); color: #FF9500; }
+        .level-success { background: rgba(52, 199, 89, 0.2); color: #248A3D; }
+        .level-error { background: rgba(255, 59, 48, 0.15); color: #FF3B30; }
+        .level-warn { background: rgba(255, 204, 0, 0.2); color: #A05A00; }
+
+        .log-time { color: #8E8E93; font-size: 11px; min-width: 65px; }
+        .log-message { color: #1D1D1F; flex: 1; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #8E8E93;
+        }
+
+        .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+
+        /* Scrollbar */
+        .log-list::-webkit-scrollbar { width: 6px; }
+        .log-list::-webkit-scrollbar-track { background: transparent; }
+        .log-list::-webkit-scrollbar-thumb { background: #C7C7CC; border-radius: 3px; }
+        .log-list::-webkit-scrollbar-thumb:hover { background: #AEAEB2; }
+
+        /* Command Input - Cyberpunk Style */
+        .command-container {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 100%);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        .command-container .card-title {
+            color: #00f2ff;
+        }
+
+        .command-input-wrapper {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .command-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-family: "SF Mono", Monaco, "Courier New", monospace;
+            color: #e0e0ff;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .command-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .command-input:focus {
+            border-color: #00f2ff;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        .command-container .btn-primary {
+            background: linear-gradient(135deg, #00f2ff 0%, #bd00ff 100%);
+            padding: 14px 28px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .command-container .btn-primary:hover {
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.5);
+        }
+
+        .command-options {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* AI Selector - Trinity */
+        .ai-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-selector-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .ai-radio {
+            cursor: pointer;
+        }
+
+        .ai-radio input[type="radio"] {
+            display: none;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .ai-badge.claude {
+            color: #D4A27F;
+            background: rgba(212, 162, 127, 0.15);
+            border-color: rgba(212, 162, 127, 0.3);
+        }
+
+        .ai-badge.gemini {
+            color: #4285F4;
+            background: rgba(66, 133, 244, 0.15);
+            border-color: rgba(66, 133, 244, 0.3);
+        }
+
+        .ai-badge.codex {
+            color: #10A37F;
+            background: rgba(16, 163, 127, 0.15);
+            border-color: rgba(16, 163, 127, 0.3);
+        }
+
+        .ai-radio input[type="radio"]:checked + .ai-badge.claude {
+            background: rgba(212, 162, 127, 0.4);
+            border-color: #D4A27F;
+            box-shadow: 0 0 10px rgba(212, 162, 127, 0.4);
+        }
+
+        .ai-radio input[type="radio"]:checked + .ai-badge.gemini {
+            background: rgba(66, 133, 244, 0.4);
+            border-color: #4285F4;
+            box-shadow: 0 0 10px rgba(66, 133, 244, 0.4);
+        }
+
+        .ai-radio input[type="radio"]:checked + .ai-badge.codex {
+            background: rgba(16, 163, 127, 0.4);
+            border-color: #10A37F;
+            box-shadow: 0 0 10px rgba(16, 163, 127, 0.4);
+        }
+
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #bd00ff;
+        }
+
+        .command-output {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 60px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: "SF Mono", Monaco, "Courier New", monospace;
+            font-size: 13px;
+            color: #8a8ab5;
+            white-space: pre-wrap;
+            word-break: break-all;
+            display: none;
+        }
+
+        .command-output.visible {
+            display: block;
+        }
+
+        .command-output.success {
+            color: #00ff88;
+            border-left: 3px solid #00ff88;
+        }
+
+        .command-output.error {
+            color: #ff4444;
+            border-left: 3px solid #ff4444;
+        }
+
+        .command-output::-webkit-scrollbar { width: 4px; }
+        .command-output::-webkit-scrollbar-track { background: transparent; }
+        .command-output::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 2px; }
+
+        /* AI Task Panel */
+        .ai-task-panel {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            padding: 16px;
+        }
+
+        .ai-task-panel .progress-header {
+            margin-bottom: 12px;
+        }
+
+        .ai-task-panel .progress-title {
+            color: #00f2ff;
+            font-size: 13px;
+        }
+
+        .task-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-status.idle {
+            background: rgba(142, 142, 147, 0.2);
+            color: #8E8E93;
+        }
+
+        .task-status.processing {
+            background: rgba(0, 242, 255, 0.2);
+            color: #00f2ff;
+            animation: status-pulse 1.5s ease-in-out infinite;
+        }
+
+        .task-status.completed {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34C759;
+        }
+
+        .task-status.error {
+            background: rgba(255, 59, 48, 0.2);
+            color: #FF3B30;
+        }
+
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .ai-instruction {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .instruction-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
             margin-bottom: 4px;
         }
 
-        .metric-label {
-            font-size: 14px;
-            opacity: 0.9;
+        .instruction-text {
+            font-size: 13px;
+            color: #e0e0ff;
+            font-weight: 500;
+            word-break: break-word;
         }
 
-        /* スクロールバーカスタマイズ */
-        .log-list::-webkit-scrollbar {
-            width: 8px;
+        .task-breakdown {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
         }
 
-        .log-list::-webkit-scrollbar-track {
-            background: transparent;
+        .breakdown-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
-        .log-list::-webkit-scrollbar-thumb {
-            background: #C7C7CC;
+        .task-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            font-size: 12px;
+            color: #e0e0ff;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item.idle {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+
+        .task-item::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #8E8E93;
+            flex-shrink: 0;
+        }
+
+        .task-item.pending::before {
+            background: #FF9500;
+        }
+
+        .task-item.running::before {
+            background: #00f2ff;
+            animation: task-pulse 1s ease-in-out infinite;
+        }
+
+        .task-item.done::before {
+            background: #34C759;
+        }
+
+        @keyframes task-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        .task-list::-webkit-scrollbar { width: 4px; }
+        .task-list::-webkit-scrollbar-track { background: transparent; }
+        .task-list::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 2px; }
+
+        /* Terminal Console */
+        .terminal-container {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #58a6ff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .terminal-icon {
+            font-size: 16px;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 16px;
+            min-height: 250px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-family: "SF Mono", Monaco, "Cascadia Code", "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .terminal-line.command {
+            color: #c9d1d9;
+        }
+
+        .terminal-line.output {
+            color: #8b949e;
+            padding-left: 20px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .terminal-line.error {
+            color: #f85149;
+            padding-left: 20px;
+        }
+
+        .terminal-line.success {
+            color: #3fb950;
+            padding-left: 20px;
+        }
+
+        .terminal-line.system {
+            color: #8b949e;
+        }
+
+        .terminal-line.ai-response {
+            color: #a371f7;
+            padding-left: 20px;
+            border-left: 2px solid #a371f7;
+            margin-left: 18px;
+        }
+
+        .prompt-user {
+            color: #3fb950;
+            font-weight: 600;
+        }
+
+        .prompt-user::before {
+            content: "❯ ";
+            color: #58a6ff;
+        }
+
+        .prompt-system {
+            color: #58a6ff;
+            font-weight: 600;
+            background: rgba(88, 166, 255, 0.1);
+            padding: 2px 6px;
             border-radius: 4px;
+            font-size: 10px;
         }
 
-        .log-list::-webkit-scrollbar-thumb:hover {
-            background: #AEAEB2;
+        .prompt-ai {
+            color: #a371f7;
+            font-weight: 600;
         }
 
-        /* レスポンシブ */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        .prompt-ai::before {
+            content: "🤖 ";
+        }
+
+        .command-text {
+            color: #c9d1d9;
+        }
+
+        .output-text {
+            color: #8b949e;
+        }
+
+        .terminal-line.processing {
+            color: #58a6ff;
+        }
+
+        .terminal-line.processing .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .terminal-input-area {
+            background: #161b22;
+            padding: 12px 16px;
+            border-top: 1px solid #30363d;
+        }
+
+        .terminal-input-area .command-options {
+            margin-bottom: 8px;
+        }
+
+        .terminal-input-area .command-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 0 12px;
+        }
+
+        .input-prompt {
+            color: #58a6ff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .terminal-input-area .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 0;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+
+        .terminal-input-area .command-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .terminal-input-area .btn-primary {
+            background: #238636;
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .terminal-input-area .btn-primary:hover {
+            background: #2ea043;
+            box-shadow: none;
+        }
+
+        .btn-icon {
+            font-size: 10px;
+        }
+
+        .terminal-body::-webkit-scrollbar { width: 8px; }
+        .terminal-body::-webkit-scrollbar-track { background: #0d1117; }
+        .terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        .terminal-body::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .neural-container { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">🌌 Iori v3.0</div>
-        <div class="status-badge">
-            <span class="status-dot"></span>
-            <span>System Online</span>
+        <div class="logo">Iori v3.0</div>
+        <div class="header-controls">
+            <!-- Iori Control -->
+            <button class="control-btn iori-btn" id="iori-toggle" onclick="toggleIori()">
+                <span class="btn-indicator off" id="iori-indicator"></span>
+                <span>IORI</span>
+            </button>
+            <!-- Trinity Meeting Button -->
+            <button class="control-btn trinity-btn" id="trinity-toggle" onclick="startTrinityMeeting()">
+                <span>🧠</span>
+                <span>Trinity Meeting</span>
+            </button>
+            <!-- Status Badge -->
+            <div class="status-badge" id="system-status">
+                <span class="status-dot"></span>
+                <span>System Online</span>
+            </div>
         </div>
     </header>
 
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <!-- AI Connections -->
+        <div class="panel-section">
+            <div class="section-title">AI Providers</div>
+            <div class="ai-controls">
+                <div class="ai-card" id="ai-claude">
+                    <div class="ai-header">
+                        <span class="ai-icon">🧠</span>
+                        <span class="ai-name">Claude</span>
+                        <span class="ai-status offline" id="claude-status">Offline</span>
+                    </div>
+                    <div class="ai-actions">
+                        <button class="ai-btn connect" onclick="connectAI('claude')">Check</button>
+                        <button class="ai-btn login" onclick="loginAI('claude')">Login</button>
+                        <button class="ai-btn use" onclick="useAI('claude')" disabled>Use</button>
+                    </div>
+                </div>
+                <div class="ai-card" id="ai-gemini">
+                    <div class="ai-header">
+                        <span class="ai-icon">💎</span>
+                        <span class="ai-name">Gemini</span>
+                        <span class="ai-status offline" id="gemini-status">Offline</span>
+                    </div>
+                    <div class="ai-actions">
+                        <button class="ai-btn connect" onclick="connectAI('gemini')">Check</button>
+                        <button class="ai-btn login" onclick="loginAI('gemini')">Login</button>
+                        <button class="ai-btn use" onclick="useAI('gemini')" disabled>Use</button>
+                    </div>
+                </div>
+                <div class="ai-card" id="ai-codex">
+                    <div class="ai-header">
+                        <span class="ai-icon">🤖</span>
+                        <span class="ai-name">Codex</span>
+                        <span class="ai-status offline" id="codex-status">Offline</span>
+                    </div>
+                    <div class="ai-actions">
+                        <button class="ai-btn connect" onclick="connectAI('codex')">Check</button>
+                        <button class="ai-btn login" onclick="loginAI('codex')">Login</button>
+                        <button class="ai-btn use" onclick="useAI('codex')" disabled>Use</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cloud Services -->
+        <div class="panel-section">
+            <div class="section-title">Cloud Services</div>
+            <div class="cloud-controls">
+                <div class="cloud-card" id="cloud-github">
+                    <div class="cloud-header">
+                        <span class="cloud-icon">📦</span>
+                        <span class="cloud-name">GitHub</span>
+                        <span class="cloud-status offline" id="github-status">Not Connected</span>
+                    </div>
+                    <div class="cloud-actions">
+                        <button class="cloud-btn" onclick="cloudAction('git', 'status')">Status</button>
+                        <button class="cloud-btn" onclick="cloudAction('git', 'syncMain')">Sync</button>
+                        <button class="cloud-btn login" onclick="cloudAction('gh', 'login')">Login</button>
+                    </div>
+                </div>
+                <div class="cloud-card" id="cloud-vercel">
+                    <div class="cloud-header">
+                        <span class="cloud-icon">▲</span>
+                        <span class="cloud-name">Vercel</span>
+                        <span class="cloud-status offline" id="vercel-status">Not Connected</span>
+                    </div>
+                    <div class="cloud-actions">
+                        <button class="cloud-btn" onclick="cloudAction('vercel', 'whoami')">Status</button>
+                        <button class="cloud-btn" onclick="cloudAction('vercel', 'deployProd')">Deploy</button>
+                        <button class="cloud-btn login" onclick="cloudAction('vercel', 'login')">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <!-- ステータスカード -->
-        <div class="card">
-            <div class="card-title">
-                <span class="card-icon">📊</span>
-                Status
+        <!-- Trinity Neural Network + Mission Status -->
+        <div class="neural-container">
+            <!-- Neural Network Visualization -->
+            <div class="network-card">
+                <div class="card-title">
+                    <span class="card-icon">🧠</span>
+                    Trinity Neural Network
+                </div>
+                <div class="network-wrapper">
+                    <svg class="network-lines" viewBox="0 0 300 280">
+                        <line x1="150" y1="140" x2="150" y2="45" class="line line-claude" id="line-claude"/>
+                        <line x1="150" y1="140" x2="55" y2="220" class="line line-gemini" id="line-gemini"/>
+                        <line x1="150" y1="140" x2="245" y2="220" class="line line-codex" id="line-codex"/>
+                    </svg>
+
+                    <div class="node node-claude" id="node-claude">
+                        <span class="node-icon">🧠</span>
+                        <span class="node-label">Claude</span>
+                        <div class="pulse-ring" style="color: #AF52DE;"></div>
+                    </div>
+
+                    <div class="node node-kernel" id="node-kernel">
+                        <span class="node-icon">💠</span>
+                        <span class="node-label">Kernel</span>
+                    </div>
+
+                    <div class="node node-gemini" id="node-gemini">
+                        <span class="node-icon">💎</span>
+                        <span class="node-label">Gemini</span>
+                        <div class="pulse-ring" style="color: #007AFF;"></div>
+                    </div>
+
+                    <div class="node node-codex" id="node-codex">
+                        <span class="node-icon">🤖</span>
+                        <span class="node-label">Codex</span>
+                        <div class="pulse-ring" style="color: #34C759;"></div>
+                    </div>
+                </div>
+
+                <div class="neural-activity">
+                    <div class="activity-label">Current Activity</div>
+                    <div class="activity-text" id="current-activity">System Standby</div>
+                </div>
             </div>
-            <div class="metric">
-                <div class="metric-value" id="uptime">--</div>
-                <div class="metric-label">Uptime (seconds)</div>
+
+            <!-- Mission Status Panel -->
+            <div class="status-panel">
+                <!-- AI Task Panel -->
+                <div class="progress-card ai-task-panel" id="ai-task-panel">
+                    <div class="progress-header">
+                        <span class="progress-title">🎯 Current Mission</span>
+                        <span class="task-status" id="task-status">Idle</span>
+                    </div>
+                    <div class="ai-instruction" id="ai-instruction">
+                        <span class="instruction-label">Instruction:</span>
+                        <span class="instruction-text" id="instruction-text">Waiting for input...</span>
+                    </div>
+                    <div class="task-breakdown" id="task-breakdown">
+                        <div class="breakdown-label">Task Breakdown:</div>
+                        <ul class="task-list" id="task-list">
+                            <li class="task-item idle">No active tasks</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="uptime">--</div>
+                        <div class="metric-label">Uptime (s)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="task-count">--</div>
+                        <div class="metric-label">Tasks</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="test-count">--</div>
+                        <div class="metric-label">Tests</div>
+                    </div>
+                </div>
+
+                <div class="log-actions" style="justify-content: center; margin-top: 8px;">
+                    <button class="btn btn-primary" onclick="runTests()">Run Tests</button>
+                </div>
             </div>
         </div>
 
-        <!-- タスクカード -->
-        <div class="card">
-            <div class="card-title">
-                <span class="card-icon">✅</span>
-                Tasks
+        <!-- Terminal Console -->
+        <div class="card command-container terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <span class="terminal-icon">⬢</span>
+                    <span>Iori Terminal</span>
+                </div>
+                <div class="terminal-controls">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
             </div>
-            <div class="metric">
-                <div class="metric-value" id="task-count">--</div>
-                <div class="metric-label">Total Tasks</div>
+
+            <!-- Terminal Output Area -->
+            <div class="terminal-body" id="terminal-body">
+                <div class="terminal-line system">
+                    <span class="prompt-system">IORI</span>
+                    <span class="output-text">Iori v3.0 Terminal Ready</span>
+                </div>
+                <div class="terminal-line system">
+                    <span class="prompt-system">IORI</span>
+                    <span class="output-text">日本語で指示を入力するとAIに転送されます</span>
+                </div>
+                <div class="terminal-line system">
+                    <span class="prompt-system">IORI</span>
+                    <span class="output-text">英語コマンド (ls, git status等) はシェルで実行されます</span>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="terminal-input-area">
+                <div class="command-options">
+                    <div class="ai-selector">
+                        <span class="ai-selector-label">AI:</span>
+                        <label class="ai-radio">
+                            <input type="radio" name="ai-choice" value="claude" checked />
+                            <span class="ai-badge claude">Claude</span>
+                        </label>
+                        <label class="ai-radio">
+                            <input type="radio" name="ai-choice" value="gemini" />
+                            <span class="ai-badge gemini">Gemini</span>
+                        </label>
+                        <label class="ai-radio">
+                            <input type="radio" name="ai-choice" value="codex" />
+                            <span class="ai-badge codex">Codex</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="command-input-wrapper">
+                    <span class="input-prompt">❯</span>
+                    <input
+                        type="text"
+                        id="command-input"
+                        class="command-input"
+                        placeholder="コマンドまたは指示を入力..."
+                        onkeydown="handleKeyDown(event)"
+                        autocomplete="off"
+                    />
+                    <button class="btn btn-primary" onclick="sendCommand()">
+                        <span class="btn-icon">▶</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- ログカード -->
+        <!-- Trinity Activity Log -->
         <div class="card log-container">
-            <div class="card-title">
-                <span class="card-icon">📝</span>
-                System Logs
+            <div class="log-header">
+                <div class="card-title" style="margin-bottom: 0;">
+                    <span class="card-icon">📝</span>
+                    Trinity Activity Log
+                </div>
+                <div class="log-actions">
+                    <button class="btn btn-secondary" onclick="clearLogs()">Clear</button>
+                </div>
             </div>
             <div class="log-list" id="log-list">
-                <div class="log-item">
-                    <span class="log-time">Initializing...</span>
-                    <span class="log-message">Loading logs from server...</span>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div>Waiting for Trinity activity...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // APIからデータを取得
+        const PROVIDER_CLASS = {
+            'CLAUDE': 'provider-claude',
+            'GEMINI': 'provider-gemini',
+            'CODEX': 'provider-codex',
+            'SYSTEM': 'provider-system'
+        };
+
+        const LEVEL_CLASS = {
+            'INFO': 'level-info',
+            'PLAN': 'level-plan',
+            'CODE': 'level-code',
+            'TEST': 'level-test',
+            'SUCCESS': 'level-success',
+            'ERROR': 'level-error',
+            'WARN': 'level-warn'
+        };
+
+        let currentActiveNode = null;
+
+        function activateNode(provider) {
+            // Deactivate all nodes and lines
+            ['claude', 'gemini', 'codex'].forEach(name => {
+                const node = document.getElementById(`node-${name}`);
+                const line = document.getElementById(`line-${name}`);
+                if (node) node.classList.remove('active');
+                if (line) line.classList.remove('active');
+            });
+
+            // Activate specified node
+            if (provider && provider !== 'SYSTEM') {
+                const nodeName = provider.toLowerCase();
+                const node = document.getElementById(`node-${nodeName}`);
+                const line = document.getElementById(`line-${nodeName}`);
+                if (node) node.classList.add('active');
+                if (line) line.classList.add('active');
+                currentActiveNode = nodeName;
+            }
+        }
+
+        function updateActivity(message) {
+            document.getElementById('current-activity').textContent = message;
+        }
+
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function renderLogItem(log) {
+            const providerClass = PROVIDER_CLASS[log.provider] || 'provider-system';
+            const levelClass = LEVEL_CLASS[log.level] || 'level-info';
+
+            return `
+                <div class="log-item" data-provider="${log.provider}">
+                    <span class="log-provider ${providerClass}">${log.provider}</span>
+                    <span class="log-level ${levelClass}">${log.level}</span>
+                    <span class="log-time">${formatTime(log.timestamp)}</span>
+                    <span class="log-message">${log.message}</span>
+                </div>
+            `;
+        }
+
         async function fetchStatus() {
             try {
                 const res = await fetch('/api/status');
@@ -257,34 +1645,33 @@
             }
         }
 
-        async function fetchLogs() {
+        async function fetchTrinityLogs() {
             try {
-                const res = await fetch('/api/logs');
+                const res = await fetch('/api/trinity/logs');
                 const data = await res.json();
                 const logList = document.getElementById('log-list');
 
-                if (data.lines && data.lines.length > 0) {
-                    logList.innerHTML = data.lines.slice(-10).reverse().map(line => {
-                        const match = line.match(/^\[(.*?)\]\s*(.*)$/);
-                        if (match) {
-                            return `
-                                <div class="log-item">
-                                    <span class="log-time">${match[1]}</span>
-                                    <span class="log-message">${match[2]}</span>
-                                </div>
-                            `;
-                        }
-                        return `
-                            <div class="log-item">
-                                <span class="log-message">${line}</span>
-                            </div>
-                        `;
-                    }).join('');
+                if (data.logs && data.logs.length > 0) {
+                    const recentLogs = data.logs.slice(-15).reverse();
+                    logList.innerHTML = recentLogs.map(renderLogItem).join('');
+
+                    // Activate node based on most recent log
+                    const latestLog = data.logs[data.logs.length - 1];
+                    if (latestLog) {
+                        activateNode(latestLog.provider);
+                        updateActivity(latestLog.message.slice(0, 50) + (latestLog.message.length > 50 ? '...' : ''));
+                    }
                 } else {
-                    logList.innerHTML = '<div class="log-item"><span class="log-message">No logs available</span></div>';
+                    logList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div>Waiting for Trinity activity...</div>
+                        </div>
+                    `;
+                    updateActivity('System Standby');
                 }
             } catch (e) {
-                console.error('Failed to fetch logs:', e);
+                console.error('Failed to fetch Trinity logs:', e);
             }
         }
 
@@ -298,17 +1685,790 @@
             }
         }
 
-        // 初回読み込み
-        fetchStatus();
-        fetchLogs();
-        fetchTodos();
+        async function runTests() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Running...';
+            updateActivity('Running tests...');
 
-        // 2秒ごとに自動更新
+            try {
+                const res = await fetch('/api/trinity/test', { method: 'POST' });
+                const data = await res.json();
+
+                const passed = data.passed || 0;
+                document.getElementById('test-count').textContent = passed;
+
+                // Update progress bar (assuming 200 total tests as target)
+                const percent = Math.min(100, Math.round((passed / 200) * 100));
+                document.getElementById('test-percent').textContent = `${percent}%`;
+                document.getElementById('test-bar').style.width = `${percent}%`;
+
+                await fetchTrinityLogs();
+            } catch (e) {
+                console.error('Failed to run tests:', e);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Run Tests';
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('log-list').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div>Logs cleared</div>
+                </div>
+            `;
+            activateNode(null);
+            updateActivity('System Standby');
+        }
+
+        // Command history
+        const commandHistory = [];
+        let historyIndex = -1;
+
+        function updateTaskPanel(instruction, status, tasks = []) {
+            const statusEl = document.getElementById('task-status');
+            const instructionEl = document.getElementById('instruction-text');
+            const taskListEl = document.getElementById('task-list');
+
+            instructionEl.textContent = instruction || 'Waiting for input...';
+            statusEl.textContent = status;
+            statusEl.className = 'task-status ' + status.toLowerCase();
+
+            if (tasks.length === 0) {
+                taskListEl.innerHTML = '<li class="task-item idle">No active tasks</li>';
+            } else {
+                taskListEl.innerHTML = tasks.map((task, i) => {
+                    const taskStatus = i === 0 ? 'running' : 'pending';
+                    return `<li class="task-item ${taskStatus}">${task}</li>`;
+                }).join('');
+            }
+        }
+
+        function parseTasksFromResponse(response) {
+            const tasks = [];
+            const lines = response.split('\n');
+            for (const line of lines) {
+                const match = line.match(/^[\s]*(\d+[\.\)]\s*|[-*]\s+)(.+)/);
+                if (match && match[2].length > 3 && match[2].length < 100) {
+                    tasks.push(match[2].trim());
+                }
+            }
+            return tasks.slice(0, 5);
+        }
+
+        function appendToTerminal(type, content, extra = {}) {
+            const terminal = document.getElementById('terminal-body');
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+
+            switch (type) {
+                case 'command':
+                    const modeLabel = extra.isAi ? '<span class="prompt-ai">AI</span>' : '';
+                    line.innerHTML = `<span class="prompt-user">${escapeHtml(content)}</span>${modeLabel}`;
+                    break;
+                case 'processing':
+                    line.innerHTML = `<span class="spinner">⟳</span> ${escapeHtml(content)}`;
+                    line.id = 'processing-line';
+                    break;
+                case 'output':
+                    line.innerHTML = escapeHtml(content);
+                    break;
+                case 'ai-response':
+                    line.innerHTML = `<span class="prompt-ai">Claude</span><br>${escapeHtml(content)}`;
+                    break;
+                case 'success':
+                    line.innerHTML = `✓ ${escapeHtml(content)}`;
+                    break;
+                case 'error':
+                    line.innerHTML = `✗ ${escapeHtml(content)}`;
+                    break;
+                case 'system':
+                    line.innerHTML = `<span class="prompt-system">IORI</span><span class="output-text">${escapeHtml(content)}</span>`;
+                    break;
+            }
+
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+            return line;
+        }
+
+        function removeProcessingLine() {
+            const line = document.getElementById('processing-line');
+            if (line) line.remove();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function handleKeyDown(event) {
+            const input = document.getElementById('command-input');
+
+            if (event.key === 'Enter') {
+                sendCommand();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    input.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    input.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                } else if (historyIndex === 0) {
+                    historyIndex = -1;
+                    input.value = '';
+                }
+            }
+        }
+
+        /**
+         * 選択されたAIを取得
+         */
+        function getSelectedAI() {
+            const selected = document.querySelector('input[name="ai-choice"]:checked');
+            return selected ? selected.value : 'claude';
+        }
+
+        /**
+         * SSE ストリーミングでコマンドを実行
+         * Trinity (Claude/Gemini/Codex) 対応
+         */
+        async function sendCommand() {
+            const input = document.getElementById('command-input');
+            const command = input.value.trim();
+            const selectedAI = getSelectedAI();
+
+            if (!command) return;
+
+            // Add to history
+            commandHistory.push(command);
+            historyIndex = -1;
+
+            // Detect AI vs Shell
+            const isAiCommand = command.startsWith('ai ') || /[^\x01-\x7E]/.test(command);
+            const displayInstruction = command.replace(/^ai\s+/, '');
+
+            // Show command in terminal
+            appendToTerminal('command', command, { isAi: isAiCommand });
+
+            // Update task panel
+            if (isAiCommand) {
+                const aiName = selectedAI.charAt(0).toUpperCase() + selectedAI.slice(1);
+                updateTaskPanel(displayInstruction, 'Processing', [`Connecting to ${aiName}...`]);
+                activateNode(selectedAI.toUpperCase());
+            } else {
+                updateTaskPanel(displayInstruction, 'Processing', ['Executing shell command...']);
+            }
+
+            updateActivity(`Processing: ${command.slice(0, 30)}...`);
+            input.value = '';
+
+            // SSE ストリーミング接続（選択されたAI CLI経由）
+            const encodedCommand = encodeURIComponent(command);
+            const eventSource = new EventSource(`/api/stream?command=${encodedCommand}&ai=${selectedAI}`);
+
+            let outputBuffer = '';
+            let streamLine = null;
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    switch (data.type) {
+                        case 'start':
+                            // ストリーミング開始
+                            streamLine = appendToTerminal('ai-response', '');
+                            const aiLabel = data.ai ? data.ai.charAt(0).toUpperCase() + data.ai.slice(1) : selectedAI.charAt(0).toUpperCase() + selectedAI.slice(1);
+                            updateTaskPanel(displayInstruction, 'Processing', [`${aiLabel} is thinking...`]);
+                            break;
+
+                        case 'output':
+                            // リアルタイム出力を追加
+                            outputBuffer += data.text;
+                            if (streamLine) {
+                                // 既存の行を更新
+                                const promptSpan = streamLine.querySelector('.prompt-ai') || document.createElement('span');
+                                if (!streamLine.querySelector('.prompt-ai')) {
+                                    promptSpan.className = 'prompt-ai';
+                                    const aiName = selectedAI.charAt(0).toUpperCase() + selectedAI.slice(1);
+                                    promptSpan.textContent = isAiCommand ? aiName : 'Shell';
+                                    streamLine.innerHTML = '';
+                                    streamLine.appendChild(promptSpan);
+                                    streamLine.appendChild(document.createElement('br'));
+                                }
+                                // 最新の出力を表示（最大2000文字）
+                                const displayText = outputBuffer.length > 2000
+                                    ? '...' + outputBuffer.slice(-2000)
+                                    : outputBuffer;
+                                const textNode = streamLine.querySelector('.stream-text') || document.createElement('span');
+                                textNode.className = 'stream-text';
+                                textNode.textContent = displayText;
+                                if (!streamLine.querySelector('.stream-text')) {
+                                    streamLine.appendChild(textNode);
+                                }
+                            }
+                            // ターミナルを最下部にスクロール
+                            const terminal = document.getElementById('terminal-body');
+                            terminal.scrollTop = terminal.scrollHeight;
+                            break;
+
+                        case 'error':
+                            appendToTerminal('error', data.text || data.message);
+                            break;
+
+                        case 'done':
+                            eventSource.close();
+                            updateActivity('Command completed');
+                            if (data.code === 0) {
+                                const tasks = parseTasksFromResponse(outputBuffer);
+                                updateTaskPanel(displayInstruction, 'Completed',
+                                    tasks.length > 0 ? tasks.map(t => '✓ ' + t) : ['✓ Response generated']);
+                                appendToTerminal('success', `Completed (exit code: ${data.code})`);
+                            } else if (data.code === -1) {
+                                updateTaskPanel(displayInstruction, 'Error', ['✗ Timeout']);
+                            } else {
+                                updateTaskPanel(displayInstruction, 'Error', [`✗ Exit code: ${data.code}`]);
+                            }
+                            fetchTrinityLogs();
+                            break;
+                    }
+                } catch (e) {
+                    console.error('Stream parse error:', e);
+                }
+            };
+
+            eventSource.onerror = (err) => {
+                console.error('EventSource error:', err);
+                eventSource.close();
+                appendToTerminal('error', 'Stream connection lost');
+                updateActivity('Connection error');
+                updateTaskPanel(displayInstruction, 'Error', ['✗ Connection lost']);
+            };
+        }
+
+        /**
+         * 従来の同期API（Deep Research用）
+         */
+        async function sendCommandLegacy(command, displayInstruction, deepResearch) {
+            appendToTerminal('processing', 'Deep Research mode - this may take several minutes...');
+
+            try {
+                // 5分タイムアウト
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 300000);
+
+                const res = await fetch('/api/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command, deepResearch }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                const data = await res.json();
+                removeProcessingLine();
+
+                if (data.success) {
+                    updateActivity('Command completed');
+                    if (data.mode === 'ai' && data.stdout) {
+                        appendToTerminal('ai-response', data.stdout);
+                        const tasks = parseTasksFromResponse(data.stdout);
+                        updateTaskPanel(displayInstruction, 'Completed', tasks.length > 0 ? tasks.map(t => '✓ ' + t) : ['✓ Response generated']);
+                    } else {
+                        if (data.stdout) appendToTerminal('output', data.stdout);
+                        appendToTerminal('success', 'Command executed successfully');
+                        updateTaskPanel(displayInstruction, 'Completed', ['✓ Command executed']);
+                    }
+                } else {
+                    appendToTerminal('error', data.stderr || data.error || 'Command failed');
+                    updateActivity('Command failed');
+                    updateTaskPanel(displayInstruction, 'Error', ['✗ ' + (data.error || 'Execution failed')]);
+                }
+
+                await fetchTrinityLogs();
+
+            } catch (e) {
+                removeProcessingLine();
+                appendToTerminal('error', e.message);
+                updateActivity('Error occurred');
+                updateTaskPanel(displayInstruction, 'Error', ['✗ ' + e.message]);
+            }
+        }
+
+        /**
+         * 爆速モード - Direct Anthropic API接続
+         * CLI起動オーバーヘッド0秒
+         */
+        async function sendCommandFast(prompt) {
+            const encodedPrompt = encodeURIComponent(prompt);
+            const eventSource = new EventSource(`/api/fast?prompt=${encodedPrompt}`);
+
+            let outputBuffer = '';
+            let streamLine = null;
+            let startTime = Date.now();
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    switch (data.type) {
+                        case 'start':
+                            streamLine = appendToTerminal('ai-response', '');
+                            updateTaskPanel(prompt, 'Processing', ['AI is thinking... [Fast Mode]']);
+                            break;
+
+                        case 'output':
+                            outputBuffer += data.text;
+                            if (streamLine) {
+                                const promptSpan = streamLine.querySelector('.prompt-ai') || document.createElement('span');
+                                if (!streamLine.querySelector('.prompt-ai')) {
+                                    promptSpan.className = 'prompt-ai';
+                                    promptSpan.textContent = 'Claude (Fast)';
+                                    streamLine.innerHTML = '';
+                                    streamLine.appendChild(promptSpan);
+                                    streamLine.appendChild(document.createElement('br'));
+                                }
+                                const displayText = outputBuffer.length > 3000
+                                    ? '...' + outputBuffer.slice(-3000)
+                                    : outputBuffer;
+                                const textNode = streamLine.querySelector('.stream-text') || document.createElement('span');
+                                textNode.className = 'stream-text';
+                                textNode.textContent = displayText;
+                                if (!streamLine.querySelector('.stream-text')) {
+                                    streamLine.appendChild(textNode);
+                                }
+                            }
+                            const terminal = document.getElementById('terminal-body');
+                            terminal.scrollTop = terminal.scrollHeight;
+                            break;
+
+                        case 'error':
+                            appendToTerminal('error', data.message);
+                            eventSource.close();
+                            updateTaskPanel(prompt, 'Error', ['✗ ' + data.message]);
+                            break;
+
+                        case 'done':
+                            eventSource.close();
+                            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                            updateActivity('Command completed');
+                            const tasks = parseTasksFromResponse(outputBuffer);
+                            updateTaskPanel(prompt, 'Completed',
+                                tasks.length > 0 ? tasks.map(t => '✓ ' + t) : ['✓ Response generated']);
+                            appendToTerminal('success', `Completed in ${elapsed}s (${data.usage?.output_tokens || '?'} tokens)`);
+                            fetchTrinityLogs();
+                            break;
+                    }
+                } catch (e) {
+                    console.error('Fast mode parse error:', e);
+                }
+            };
+
+            eventSource.onerror = (err) => {
+                console.error('Fast mode error:', err);
+                eventSource.close();
+
+                // APIキーが設定されていない場合のフォールバック
+                if (!outputBuffer) {
+                    appendToTerminal('system', 'Fast Mode unavailable - falling back to CLI mode');
+                    // CLI モードにフォールバック
+                    sendCommandCLI(prompt);
+                } else {
+                    appendToTerminal('error', 'Stream connection lost');
+                    updateActivity('Connection error');
+                    updateTaskPanel(prompt, 'Error', ['✗ Connection lost']);
+                }
+            };
+        }
+
+        /**
+         * CLI経由でAIコマンドを実行（フォールバック用）
+         */
+        async function sendCommandCLI(prompt) {
+            const encodedCommand = encodeURIComponent(prompt);
+            const eventSource = new EventSource(`/api/stream?command=${encodedCommand}`);
+
+            let outputBuffer = '';
+            let streamLine = appendToTerminal('ai-response', '');
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'output') {
+                        outputBuffer += data.text;
+                        if (streamLine) {
+                            const promptSpan = streamLine.querySelector('.prompt-ai') || document.createElement('span');
+                            if (!streamLine.querySelector('.prompt-ai')) {
+                                promptSpan.className = 'prompt-ai';
+                                promptSpan.textContent = 'Claude (CLI)';
+                                streamLine.innerHTML = '';
+                                streamLine.appendChild(promptSpan);
+                                streamLine.appendChild(document.createElement('br'));
+                            }
+                            const textNode = streamLine.querySelector('.stream-text') || document.createElement('span');
+                            textNode.className = 'stream-text';
+                            textNode.textContent = outputBuffer;
+                            if (!streamLine.querySelector('.stream-text')) {
+                                streamLine.appendChild(textNode);
+                            }
+                        }
+                    } else if (data.type === 'done') {
+                        eventSource.close();
+                        updateActivity('Command completed');
+                        updateTaskPanel(prompt, 'Completed', ['✓ Response generated (CLI mode)']);
+                        appendToTerminal('success', `Completed (exit code: ${data.code})`);
+                    } else if (data.type === 'error') {
+                        appendToTerminal('error', data.text || data.message);
+                    }
+                } catch (e) {
+                    console.error('CLI mode parse error:', e);
+                }
+            };
+
+            eventSource.onerror = () => {
+                eventSource.close();
+                appendToTerminal('error', 'CLI connection lost');
+            };
+        }
+
+        // ============================================
+        // IORI & AI & Cloud Control Functions
+        // ============================================
+
+        let ioriActive = false;
+        const aiStatus = { claude: false, gemini: false, codex: false };
+        let activeAI = null;
+
+        function toggleIori() {
+            ioriActive = !ioriActive;
+            const btn = document.getElementById('iori-toggle');
+            const indicator = document.getElementById('iori-indicator');
+
+            if (ioriActive) {
+                btn.classList.add('active');
+                indicator.classList.remove('off');
+                indicator.classList.add('on');
+                appendToTerminal('system', 'IORI System activated');
+                updateActivity('IORI System running');
+                // Check AI connections
+                checkAllAIStatus();
+            } else {
+                btn.classList.remove('active');
+                indicator.classList.add('off');
+                indicator.classList.remove('on');
+                appendToTerminal('system', 'IORI System deactivated');
+                updateActivity('System Standby');
+            }
+        }
+
+        async function connectAI(provider) {
+            const statusEl = document.getElementById(`${provider}-status`);
+            const card = document.getElementById(`ai-${provider}`);
+            const useBtn = card.querySelector('.ai-btn.use');
+
+            statusEl.textContent = 'Connecting...';
+            statusEl.className = 'ai-status busy';
+            appendToTerminal('system', `Connecting to ${provider.toUpperCase()}...`);
+
+            try {
+                const res = await fetch('/api/cli/status');
+                const data = await res.json();
+
+                // Find the tool by its 'tool' property (not 'name')
+                const toolResult = data.tools?.find(t => t.tool === provider);
+
+                if (toolResult && toolResult.status === 'ready') {
+                    aiStatus[provider] = true;
+                    statusEl.textContent = 'Online';
+                    statusEl.className = 'ai-status online';
+                    card.classList.add('connected');
+                    useBtn.disabled = false;
+                    appendToTerminal('success', `${provider.toUpperCase()} connected successfully`);
+                } else if (toolResult && toolResult.status === 'not_authenticated') {
+                    statusEl.textContent = 'Not Auth';
+                    statusEl.className = 'ai-status busy';
+                    appendToTerminal('error', `${provider.toUpperCase()} not authenticated. Run login command.`);
+                } else {
+                    statusEl.textContent = 'Not Installed';
+                    statusEl.className = 'ai-status offline';
+                    appendToTerminal('error', `${provider.toUpperCase()} CLI not found. ${toolResult?.message || ''}`);
+                }
+            } catch (e) {
+                statusEl.textContent = 'Error';
+                statusEl.className = 'ai-status offline';
+                appendToTerminal('error', `Failed to connect: ${e.message}`);
+            }
+        }
+
+        function useAI(provider) {
+            // Deactivate all AI cards
+            ['claude', 'gemini', 'codex'].forEach(p => {
+                document.getElementById(`ai-${p}`).classList.remove('active');
+            });
+
+            // Activate selected
+            document.getElementById(`ai-${provider}`).classList.add('active');
+            activeAI = provider;
+            activateNode(provider.toUpperCase());
+            appendToTerminal('system', `Now using ${provider.toUpperCase()} as primary AI`);
+            updateActivity(`Active AI: ${provider.toUpperCase()}`);
+        }
+
+        async function loginAI(provider) {
+            const statusEl = document.getElementById(`${provider}-status`);
+            statusEl.textContent = 'Logging in...';
+            statusEl.className = 'ai-status busy';
+            appendToTerminal('system', `Launching ${provider.toUpperCase()} login...`);
+
+            try {
+                const res = await fetch('/api/cli/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool: provider })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    appendToTerminal('success', data.message || `${provider.toUpperCase()} login launched`);
+                    appendToTerminal('system', 'Complete authentication in the terminal/browser window');
+                    // Re-check status after a delay
+                    setTimeout(() => connectAI(provider), 5000);
+                } else {
+                    appendToTerminal('error', data.error || 'Login failed');
+                    statusEl.textContent = 'Login Failed';
+                    statusEl.className = 'ai-status offline';
+                }
+            } catch (e) {
+                appendToTerminal('error', `Login error: ${e.message}`);
+                statusEl.textContent = 'Error';
+                statusEl.className = 'ai-status offline';
+            }
+        }
+
+        async function checkAllAIStatus() {
+            try {
+                const res = await fetch('/api/cli/status');
+                const data = await res.json();
+
+                if (data.tools && Array.isArray(data.tools)) {
+                    data.tools.forEach(toolResult => {
+                        // toolResult has: tool (name), status, message
+                        const provider = toolResult.tool; // 'claude', 'gemini', 'codex'
+                        if (['claude', 'gemini', 'codex'].includes(provider)) {
+                            const statusEl = document.getElementById(`${provider}-status`);
+                            const card = document.getElementById(`ai-${provider}`);
+                            const useBtn = card?.querySelector('.ai-btn.use');
+
+                            if (toolResult.status === 'ready') {
+                                aiStatus[provider] = true;
+                                if (statusEl) {
+                                    statusEl.textContent = 'Online';
+                                    statusEl.className = 'ai-status online';
+                                }
+                                if (card) card.classList.add('connected');
+                                if (useBtn) useBtn.disabled = false;
+                            } else if (toolResult.status === 'not_authenticated') {
+                                if (statusEl) {
+                                    statusEl.textContent = 'Not Auth';
+                                    statusEl.className = 'ai-status busy';
+                                }
+                            } else if (toolResult.status === 'not_installed') {
+                                if (statusEl) {
+                                    statusEl.textContent = 'Not Installed';
+                                    statusEl.className = 'ai-status offline';
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to check AI status:', e);
+            }
+        }
+
+        async function cloudAction(service, action) {
+            appendToTerminal('system', `Executing ${service} ${action}...`);
+
+            try {
+                const res = await fetch('/api/cloud/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ service, action })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    appendToTerminal('success', data.stdout || data.message || `${action} completed`);
+
+                    // Update status based on action
+                    if (service === 'git' && action === 'status') {
+                        document.getElementById('github-status').textContent = 'Connected';
+                        document.getElementById('github-status').className = 'cloud-status online';
+                        document.getElementById('cloud-github').classList.add('connected');
+                    }
+                    if (service === 'vercel' && action === 'whoami') {
+                        document.getElementById('vercel-status').textContent = 'Connected';
+                        document.getElementById('vercel-status').className = 'cloud-status online';
+                        document.getElementById('cloud-vercel').classList.add('connected');
+                    }
+                } else if (data.requiresConfirmation) {
+                    appendToTerminal('system', `Action requires confirmation: ${data.message}`);
+                    appendToTerminal('system', `Pending ID: ${data.pendingId}`);
+                } else {
+                    appendToTerminal('error', data.error || data.stderr || 'Action failed');
+                }
+            } catch (e) {
+                appendToTerminal('error', `Cloud action failed: ${e.message}`);
+            }
+        }
+
+        async function checkCloudStatus() {
+            // Check Git status
+            try {
+                const res = await fetch('/api/cloud/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ service: 'git', action: 'status' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('github-status').textContent = 'Connected';
+                    document.getElementById('github-status').className = 'cloud-status online';
+                    document.getElementById('cloud-github').classList.add('connected');
+                }
+            } catch (e) {
+                // Ignore
+            }
+        }
+
+        /**
+         * Trinity Meeting を開始
+         */
+        let trinityMeetingActive = false;
+
+        async function startTrinityMeeting() {
+            if (trinityMeetingActive) {
+                appendToTerminal('system', 'Trinity Meeting already in progress...');
+                return;
+            }
+
+            const topic = prompt('🧠 Trinity Meeting\n\n何について議論しますか？\n\n例: "TODOアプリを作りたい"');
+            if (!topic) return;
+
+            trinityMeetingActive = true;
+            const trinityBtn = document.getElementById('trinity-toggle');
+            trinityBtn.classList.add('active');
+
+            appendToTerminal('system', `🧠 Trinity Protocol starting: ${topic}`);
+            appendToTerminal('system', '会議参加者: 🎯Strategist(Claude), 🎨Designer(Gemini), ⚙️Engineer(Codex)');
+            updateTaskPanel(topic, 'Trinity Meeting', ['AI会議を開始中...']);
+
+            try {
+                const encodedTopic = encodeURIComponent(topic);
+                const eventSource = new EventSource(`/api/trinity/meeting?topic=${encodedTopic}`);
+
+                eventSource.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+
+                        switch (data.type) {
+                            case 'start':
+                                appendToTerminal('system', '📍 会議開始');
+                                break;
+
+                            case 'round_start':
+                                appendToTerminal('system', `\n📍 ラウンド ${data.round} 開始`);
+                                updateTaskPanel(topic, 'Trinity Meeting', [`ラウンド ${data.round} 進行中...`]);
+                                break;
+
+                            case 'statement':
+                                const speaker = `${data.emoji} ${data.speaker}`;
+                                appendToTerminal('output', `${speaker}: ${data.content}`);
+                                activateNode(data.speaker === 'Strategist' ? 'CLAUDE' :
+                                            data.speaker === 'Designer' ? 'GEMINI' : 'CODEX');
+                                break;
+
+                            case 'round_end':
+                                appendToTerminal('system', `📍 ラウンド ${data.round} 終了`);
+                                break;
+
+                            case 'finalizing':
+                                appendToTerminal('system', '📝 最終仕様書を作成中...');
+                                updateTaskPanel(topic, 'Trinity Meeting', ['仕様書作成中...']);
+                                break;
+
+                            case 'result':
+                                appendToTerminal('system', '\n✅ Trinity Meeting 完了');
+                                appendToTerminal('success', `会議ID: ${data.meetingId}`);
+                                appendToTerminal('success', `タスク数: ${data.tasks?.length || 0}`);
+
+                                if (data.finalSpec) {
+                                    appendToTerminal('system', '\n📋 最終仕様書:');
+                                    appendToTerminal('output', data.finalSpec.slice(0, 500) + (data.finalSpec.length > 500 ? '...' : ''));
+                                }
+
+                                if (data.tasks && data.tasks.length > 0) {
+                                    updateTaskPanel(topic, 'Completed', data.tasks.map(t => t.title));
+                                }
+
+                                trinityMeetingActive = false;
+                                trinityBtn.classList.remove('active');
+                                eventSource.close();
+                                break;
+
+                            case 'error':
+                                appendToTerminal('error', `Meeting error: ${data.error}`);
+                                trinityMeetingActive = false;
+                                trinityBtn.classList.remove('active');
+                                eventSource.close();
+                                break;
+
+                            case 'complete':
+                                // Already handled in 'result'
+                                break;
+                        }
+                    } catch (e) {
+                        console.error('Parse error:', e);
+                    }
+                };
+
+                eventSource.onerror = () => {
+                    appendToTerminal('error', 'Connection to Trinity Meeting lost');
+                    trinityMeetingActive = false;
+                    trinityBtn.classList.remove('active');
+                    eventSource.close();
+                };
+
+            } catch (e) {
+                appendToTerminal('error', `Trinity Meeting failed: ${e.message}`);
+                trinityMeetingActive = false;
+                trinityBtn.classList.remove('active');
+            }
+        }
+
+        // Initial load
+        fetchStatus();
+        fetchTrinityLogs();
+        fetchTodos();
+        checkAllAIStatus();
+        checkCloudStatus();
+
+        // Auto refresh
         setInterval(() => {
             fetchStatus();
-            fetchLogs();
+            fetchTrinityLogs();
             fetchTodos();
-        }, 2000);
+        }, 3000);
     </script>
 </body>
 </html>

@@ -22,5 +22,16 @@ build/
 
 # Iori specific
 .iori_temp/
+.iori/meetings/
+.iori/memories/
+.iori/logs/
 iori_system.log
 test_*.ts
+
+# Build outputs (Electron)
+dist-electron/
+dist-pkg/
+
+# Reports (generated)
+*_REPORT*.txt
+STATUS_REPORT*.txt
