@@ -1,7 +1,8 @@
 /**
- * Iori v3.0 Frontend Server
+ * Iori v4.0 Frontend Server
  * Apple-inspired Dashboard Backend
  * CLI-based AI execution (Claude/Gemini/Codex)
+ * Trinity Protocol Meeting Support
  */
 import express from "express";
 import path from "path";
@@ -9,6 +10,7 @@ import { fileURLToPath } from "url";
 import fs from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { executeMeeting, listMeetings, getMeeting } from "../skills/meeting.js";
 
 const execPromise = promisify(exec);
 
@@ -336,6 +338,99 @@ app.post("/api/exec", async (req, res) => {
       res.status(400).json({
         error: "Command is required and must be a string"
       });
+      return;
+    }
+
+    // ★ Trinity Meeting Command: /meeting "<intent>"
+    if (command.startsWith("/meeting")) {
+      const intentMatch = command.match(/^\/meeting\s+["']?(.+?)["']?$/);
+      const intent = intentMatch?.[1] || command.replace("/meeting", "").trim();
+
+      if (!intent) {
+        res.json({
+          command,
+          stdout: "Usage: /meeting \"<intent>\"\nExample: /meeting \"Implement user authentication\"",
+          stderr: "",
+          success: false,
+          mode: "meeting"
+        });
+        return;
+      }
+
+      console.log(`[Meeting] Starting Trinity Council: ${intent}`);
+
+      try {
+        const result = await executeMeeting({ intent, workingDir: projectRoot });
+
+        if (result.success) {
+          const output = `🤝 Trinity Council Meeting Complete
+
+📋 Meeting ID: ${result.meetingId}
+📄 Plan: ${result.planPath}
+📊 Work Units: ${result.workUnits}
+⏱️ Duration: ${result.duration}ms
+
+## Summary
+${result.summary}
+
+Use /apply-plan ${result.meetingId} to queue work units.`;
+
+          res.json({
+            command,
+            stdout: output,
+            stderr: "",
+            success: true,
+            mode: "meeting",
+            meetingId: result.meetingId,
+            planPath: result.planPath
+          });
+        } else {
+          res.json({
+            command,
+            stdout: "",
+            stderr: `Meeting failed: ${result.error}`,
+            success: false,
+            mode: "meeting"
+          });
+        }
+      } catch (meetingError) {
+        const message = meetingError instanceof Error ? meetingError.message : "Unknown error";
+        console.error(`[Meeting] Error:`, message);
+        res.json({
+          command,
+          stdout: "",
+          stderr: `Meeting error: ${message}`,
+          success: false,
+          mode: "meeting"
+        });
+      }
+      return;
+    }
+
+    // ★ List Meetings: /meetings
+    if (command === "/meetings" || command.startsWith("/meetings list")) {
+      try {
+        const meetings = await listMeetings(projectRoot);
+        const output = meetings.length > 0
+          ? `📋 Recent Meetings:\n\n${meetings.map(m => `• ${m.id}\n  Intent: ${m.intent}`).join("\n\n")}`
+          : "No meetings found. Run /meeting \"<intent>\" to start one.";
+
+        res.json({
+          command,
+          stdout: output,
+          stderr: "",
+          success: true,
+          mode: "meeting"
+        });
+      } catch (error) {
+        res.json({
+          command,
+          stdout: "",
+          stderr: "Failed to list meetings",
+          success: false,
+          mode: "meeting"
+        });
+      }
       return;
     }
 
@@ -1288,6 +1383,95 @@ app.get("/api/trinity/meetings/:id", async (req, res) => {
     res.json({
       success: true,
       meeting: minutes
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// =====================================
+// Trinity Protocol Meeting APIs
+// =====================================
+
+// API: Start a new meeting
+app.post("/api/meetings", async (req, res) => {
+  try {
+    const { intent } = req.body;
+
+    if (!intent || typeof intent !== "string") {
+      res.status(400).json({
+        success: false,
+        error: "Intent is required"
+      });
+      return;
+    }
+
+    console.log(`[Meeting API] Starting: ${intent}`);
+    const result = await executeMeeting({ intent, workingDir: projectRoot });
+
+    res.json({
+      success: result.success,
+      meetingId: result.meetingId,
+      planPath: result.planPath,
+      summary: result.summary,
+      workUnits: result.workUnits,
+      duration: result.duration,
+      error: result.error
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// API: List all meetings
+app.get("/api/meetings", async (_req, res) => {
+  try {
+    const meetings = await listMeetings(projectRoot);
+    res.json({
+      success: true,
+      meetings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
+// API: Get a specific meeting
+app.get("/api/meetings/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const meeting = await getMeeting(id, projectRoot);
+
+    if (!meeting) {
+      res.status(404).json({
+        success: false,
+        error: "Meeting not found"
+      });
+      return;
+    }
+
+    // Read the full plan.md content
+    const planPath = path.join(projectRoot, ".iori", "meetings", id, "plan.md");
+    let planContent = "";
+    try {
+      planContent = await fs.readFile(planPath, "utf-8");
+    } catch {
+      // Plan file might not exist
+    }
+
+    res.json({
+      success: true,
+      meeting,
+      planContent
     });
   } catch (error) {
     res.status(500).json({
